@@ -5,9 +5,9 @@ const rows = document.getElementById('rows');
 const cols = document.getElementById('cols');
 const clearBtn = document.getElementById('clear-draw');
 const colorPicker = document.getElementById('color-picker');
-const randomColor = document.getElementById('random-color');
+const randomColorToggle = document.getElementById('random-color');
 let color = colorPicker.value;
-let randomColorChecked = randomColor.checked;
+let randomColorChecked = randomColorToggle.checked;
 
 function random255() {
   return Math.floor(Math.random() * 255);
@@ -28,8 +28,8 @@ colorPicker.addEventListener('input', (e) => {
   color = e.target.value;
 });
 
-randomColor.addEventListener('input', (e) => {
-  randomColorChecked = randomColor.checked;
+randomColorToggle.addEventListener('input', (e) => {
+  randomColorChecked = randomColorToggle.checked;
 });
 
 clearBtn.addEventListener('click', (e) => {
