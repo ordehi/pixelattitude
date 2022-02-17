@@ -9,8 +9,19 @@ const randomColorToggle = document.getElementById('random-color');
 let color = colorPicker.value;
 let randomColorChecked = randomColorToggle.checked;
 
+// Functions
+
 function random255() {
   return Math.floor(Math.random() * 255);
+}
+
+function randomRGBA() {
+  let r = random255();
+  let g = random255();
+  let b = random255();
+  let a = Math.random().toFixed(1);
+
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
 function createGrid(rows, cols) {
@@ -23,6 +34,28 @@ function createGrid(rows, cols) {
     app.appendChild(cell);
   }
 }
+
+// Event Handlers
+
+function isCell(e) {
+  return e.target.classList.contains('cell');
+}
+
+function paintCell(e) {
+  e.target.style.backgroundColor = randomColorChecked ? randomRGBA() : color;
+}
+
+function clearCell() {
+  e.target.style.backgroundColor = 'unset';
+}
+
+function handlePainting(e) {
+  if (isCell(e)) {
+    paintCell(e);
+  }
+}
+
+// Event Listeners
 
 colorPicker.addEventListener('input', (e) => {
   color = e.target.value;
@@ -39,22 +72,6 @@ clearBtn.addEventListener('click', (e) => {
   if (cols.value > 50) cols.value = 50;
   createGrid(rows.value || 32, cols.value || 32);
 });
-
-createGrid(32, 32);
-
-function isCell(e) {
-  return e.target.classList.contains('cell');
-}
-
-function paintCell(e) {
-  e.target.style.backgroundColor = randomColorChecked ? randomRGBA() : color;
-}
-
-function handlePainting(e) {
-  if (isCell(e)) {
-    paintCell(e);
-  }
-}
 
 app.addEventListener('click', handlePainting);
 
@@ -73,15 +90,6 @@ app.addEventListener('contextmenu', (e) => {
   }
 });
 
-function clearCell() {
-  e.target.style.backgroundColor = 'unset';
-}
+// Lifecycle
 
-function randomRGBA() {
-  let r = random255();
-  let g = random255();
-  let b = random255();
-  let a = Math.random().toFixed(1);
-
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
-}
+createGrid(32, 32);
