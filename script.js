@@ -39,6 +39,10 @@ function isLeftClick(e) {
   return e.buttons === 1;
 }
 
+function isRightClick(e) {
+  return e.buttons === 2;
+}
+
 function isCell(e) {
   return e.target.classList.contains('cell');
 }
@@ -83,11 +87,14 @@ app.addEventListener('click', handlePainting);
 app.addEventListener('mousedown', (e) => {
   if (isLeftClick(e)) {
     app.addEventListener('mousemove', handlePainting);
+  } else if (isRightClick(e)) {
+    app.addEventListener('mousemove', handleClearing);
   }
 });
 
 app.addEventListener('mouseup', (e) => {
   app.removeEventListener('mousemove', handlePainting);
+  app.removeEventListener('mousemove', handleClearing);
 });
 
 app.addEventListener('contextmenu', handleClearing);
