@@ -1,3 +1,5 @@
+document.addEventListener('contextmenu', (event) => event.preventDefault());
+
 const app = document.querySelector('.container');
 const rows = document.getElementById('rows');
 const cols = document.getElementById('cols');
@@ -40,9 +42,15 @@ clearBtn.addEventListener('click', (e) => {
 
 createGrid(32, 32);
 
-app.addEventListener('mouseover', (e) => {
+app.addEventListener('click', (e) => {
   if (e.target.classList.contains('cell')) {
     e.target.style.backgroundColor = randomColorChecked ? randomRGBA() : color;
+  }
+});
+
+app.addEventListener('contextmenu', (e) => {
+  if (e.target.classList.contains('cell')) {
+    e.target.style.backgroundColor = 'unset';
   }
 });
 
