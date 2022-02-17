@@ -42,10 +42,29 @@ clearBtn.addEventListener('click', (e) => {
 
 createGrid(32, 32);
 
-app.addEventListener('click', (e) => {
-  if (e.target.classList.contains('cell')) {
-    e.target.style.backgroundColor = randomColorChecked ? randomRGBA() : color;
+function isCell(e) {
+  return e.target.classList.contains('cell');
+}
+
+function paintCell(e) {
+  e.target.style.backgroundColor = randomColorChecked ? randomRGBA() : color;
+}
+
+function handlePainting(e) {
+  if (isCell(e)) {
+    paintCell(e);
   }
+}
+
+app.addEventListener('click', handlePainting);
+
+app.addEventListener('mousedown', (e) => {
+  app.addEventListener('mousemove', handlePainting);
+});
+
+app.addEventListener('mouseup', (e) => {
+  app.removeEventListener('mousemove', handlePainting);
+  console.log('removed move');
 });
 
 app.addEventListener('contextmenu', (e) => {
@@ -53,6 +72,10 @@ app.addEventListener('contextmenu', (e) => {
     e.target.style.backgroundColor = 'unset';
   }
 });
+
+function clearCell() {
+  e.target.style.backgroundColor = 'unset';
+}
 
 function randomRGBA() {
   let r = random255();
