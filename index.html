@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Etch-A-Sketch</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="content">
+      <header>
+        <h1 class="title">Etch-A-Sketch</h1>
+        <form action="#" id="grid-config">
+          <ul>
+            <li>
+              <label for="rows">Rows</label>
+              <input type="number" name="rows" id="rows" max="50" value="32" />
+            </li>
+            <li>
+              <label for="cols">Columns</label>
+              <input type="number" name="cols" id="cols" max="50" value="32" />
+            </li>
+            <li>
+              <button id="clear-draw">Reset</button>
+            </li>
+          </ul>
+          <ul>
+            <li>
+              <label for="colorp">Pick a color</label>
+              <input
+                type="color"
+                name="colorp"
+                id="color-picker"
+                value="#00ffff"
+              />
+            </li>
+            <li>
+              <label for="random">Random Color?</label>
+              <input type="checkbox" name="random" id="random-color" />
+            </li>
+          </ul>
+        </form>
+      </header>
+      <div class="container"></div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,101 @@
+:root {
+  --grid-cols: 1;
+  --grid-rows: 1;
+}
+
+body {
+  font-family: 'Courier New', Courier, monospace;
+  margin: auto;
+  background-color: black;
+  color: white;
+  height: 100vh;
+}
+
+header {
+  width: 100%;
+}
+
+.title {
+  margin: 1em;
+  text-align: center;
+  border: 1px solid white;
+}
+
+.container {
+  padding: 1em;
+  margin: auto;
+  width: fit-content;
+  display: grid;
+  grid-gap: 0;
+  grid-template-rows: repeat(var(--grid-rows), 1fr);
+  grid-template-columns: repeat(var(--grid-cols), 0fr);
+}
+
+.cell {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+/* .cell:hover {
+  background-color: aqua;
+} */
+
+.colored {
+  background-color: aqua;
+}
+
+#grid-config {
+  display: flex;
+  justify-content: center;
+  background-color: rgb(142, 144, 213);
+  margin: auto;
+}
+
+/* input, textarea, button, select {
+  appearance: none;
+  -webkit-appearance: none;
+} */
+
+#grid-config button {
+  border-radius: 5px;
+  border: none;
+  width: 100px;
+  background-color: white;
+  color: black;
+}
+
+#grid-config button:hover {
+  background-color: aqua;
+}
+
+ul {
+  list-style-type: none;
+}
+
+input, button {
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 100%;
+  width: 50px;
+  padding: 0.2em;
+  margin: 0;
+}
+
+label {
+  width: 150px;
+  text-align: right;
+  padding-right: .5em;
+}
+
+li {
+  margin: 0.5em 0;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
+
+input:focus {
+  border: 2px solid #fff;
+}
