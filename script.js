@@ -35,6 +35,10 @@ function createGrid(rows, cols) {
 
 // Event Handlers
 
+function isLeftClick(e) {
+  return e.buttons === 1;
+}
+
 function isCell(e) {
   return e.target.classList.contains('cell');
 }
@@ -77,12 +81,13 @@ clearBtn.addEventListener('click', (e) => {
 app.addEventListener('click', handlePainting);
 
 app.addEventListener('mousedown', (e) => {
-  app.addEventListener('mousemove', handlePainting);
+  if (isLeftClick(e)) {
+    app.addEventListener('mousemove', handlePainting);
+  }
 });
 
 app.addEventListener('mouseup', (e) => {
   app.removeEventListener('mousemove', handlePainting);
-  console.log('removed move');
 });
 
 app.addEventListener('contextmenu', handleClearing);
