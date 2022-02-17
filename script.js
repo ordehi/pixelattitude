@@ -1,5 +1,3 @@
-document.addEventListener('contextmenu', (event) => event.preventDefault());
-
 const app = document.querySelector('.container');
 const rows = document.getElementById('rows');
 const cols = document.getElementById('cols');
@@ -45,14 +43,17 @@ function paintCell(e) {
   e.target.style.backgroundColor = randomColorChecked ? randomRGBA() : color;
 }
 
-function clearCell() {
+function clearCell(e) {
   e.target.style.backgroundColor = 'unset';
 }
 
 function handlePainting(e) {
-  if (isCell(e)) {
-    paintCell(e);
-  }
+  if (isCell(e)) paintCell(e);
+}
+
+function handleClearing(e) {
+  e.preventDefault();
+  if (isCell(e)) clearCell(e);
 }
 
 // Event Listeners
@@ -84,11 +85,7 @@ app.addEventListener('mouseup', (e) => {
   console.log('removed move');
 });
 
-app.addEventListener('contextmenu', (e) => {
-  if (e.target.classList.contains('cell')) {
-    e.target.style.backgroundColor = 'unset';
-  }
-});
+app.addEventListener('contextmenu', handleClearing);
 
 // Lifecycle
 
