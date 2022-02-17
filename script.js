@@ -7,7 +7,7 @@ const randomColorToggle = document.getElementById('random-color');
 let color = colorPicker.value;
 let randomColorChecked = randomColorToggle.checked;
 
-// Functions
+/* Utility Functions */
 
 function random255() {
   return Math.floor(Math.random() * 255);
@@ -33,7 +33,7 @@ function createGrid(rows, cols) {
   }
 }
 
-// Event Handlers
+/* Event Handlers */
 
 function isLeftClick(e) {
   return e.buttons === 1;
@@ -60,7 +60,7 @@ function handleClearing(e) {
   if (isCell(e)) clearCell(e);
 }
 
-// Event Listeners
+/* Event Listeners */
 
 colorPicker.addEventListener('input', (e) => {
   color = e.target.value;
@@ -92,6 +92,12 @@ app.addEventListener('mouseup', (e) => {
 
 app.addEventListener('contextmenu', handleClearing);
 
-// Lifecycle
+// Prevent dragging to avoid glitchy drawing
+
+app.addEventListener('dragstart', (e) => {
+  e.preventDefault();
+});
+
+/* Lifecycle */
 
 createGrid(32, 32);
