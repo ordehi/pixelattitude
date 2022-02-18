@@ -9,6 +9,7 @@ let randomColorChecked = randomColorToggle.checked;
 
 const undoStore = [];
 const redoStore = [];
+const intermediateMemory = [];
 
 /* 
 Undo
@@ -42,7 +43,7 @@ function createGrid(rows, cols) {
   for (count = 0; count < rows * cols; count += 1) {
     let cell = document.createElement('div');
     cell.classList.add('cell');
-    cell.classList.add('cell-' + count);
+    cell.id = 'cell-' + count;
     app.appendChild(cell);
   }
 }
@@ -62,7 +63,9 @@ function isCell(e) {
 }
 
 function paintCell(e) {
-  e.target.style.backgroundColor = randomColorChecked ? randomRGBA() : color;
+  applyColor = randomColorChecked ? randomRGBA() : color;
+  e.target.style.backgroundColor = applyColor;
+  writeIntermidiateMemory(e.target.id, applyColor);
 }
 
 function clearCell(e) {
@@ -76,6 +79,38 @@ function handlePainting(e) {
 function handleClearing(e) {
   e.preventDefault();
   if (isCell(e)) clearCell(e);
+}
+
+function writeIntermidiateMemory(cell, color) {
+  if (intermediateMemory.length === 0) intermediateMemory.push([]);
+  intermediateMemory[0].push({ cell, color });
+  console.log(intermediateMemory);
+}
+
+function writeUndo(memory) {
+  undoStore.push(memory.pop());
+}
+
+function removeListenersAndWrite(e) {
+  app.removeEventListener('mousemove', handlePainting);
+  app.removeEventListener('mousemove', handleClearing);
+  if (intermediateMemory.length !== 0) {
+    writeUndo(intermediateMemory);
+  } else {
+    handlePainting(e);
+    writeUndo(intermediateMemory);
+  }
+  app.removeEventListener('mouseup', removeListenersAndWrite);
+}
+
+function handleMousedown(e) {
+  if (isLeftClick(e)) {
+    app.addEventListener('mousemove', handlePainting);
+  } else if (isRightClick(e)) {
+    app.addEventListener('mousemove', handleClearing);
+  }
+
+  app.addEventListener('mouseup', removeListenersAndWrite);
 }
 
 /* Event Listeners */
@@ -96,20 +131,9 @@ clearBtn.addEventListener('click', (e) => {
   createGrid(rows.value || 32, cols.value || 32);
 });
 
-app.addEventListener('click', handlePainting);
+//app.addEventListener('click', handlePainting);
 
-app.addEventListener('mousedown', (e) => {
-  if (isLeftClick(e)) {
-    app.addEventListener('mousemove', handlePainting);
-  } else if (isRightClick(e)) {
-    app.addEventListener('mousemove', handleClearing);
-  }
-});
-
-app.addEventListener('mouseup', (e) => {
-  app.removeEventListener('mousemove', handlePainting);
-  app.removeEventListener('mousemove', handleClearing);
-});
+app.addEventListener('mousedown', handleMousedown);
 
 app.addEventListener('contextmenu', handleClearing);
 
