@@ -7,6 +7,20 @@ const randomColorToggle = document.getElementById('random-color');
 let color = colorPicker.value;
 let randomColorChecked = randomColorToggle.checked;
 
+const undoStore = [];
+const redoStore = [];
+
+/* 
+Undo
+
+When something is done, the cells and their respective colors are stored as an object inside undoStore with two properties, cells and colors. Each property contains an array with the values of all cells and their respective colors.
+
+Since drag to paint will produce several cell-color pairs before the mouseup event, we should only push the values after the mouseup event, in the same listener that removes the listeners for the drag to paint action.
+
+For the click to paint action, we can do the write to undoStore on the same handler that does the click
+
+*/
+
 /* Utility Functions */
 
 function random255() {
