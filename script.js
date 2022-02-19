@@ -11,6 +11,7 @@ const undoStore = [];
 const redoStore = [];
 const intermediateMemory = [];
 
+let currentRun = 0;
 /* 
 Undo
 
@@ -52,34 +53,83 @@ function createGrid(rows, cols) {
 /* Event Handlers */
 
 function isLeftClick(e) {
-  return e.buttons === 1;
+  return e.button === 0;
 }
 
 function isRightClick(e) {
-  return e.buttons === 2;
+  return e.button === 2;
 }
 
-function isCell(e) {
-  return e.target.classList.contains('cell');
+function isCellNotInRun(e) {
+  return (
+    e.target.classList.contains('cell') &&
+    e.target.dataset.run !== String(currentRun)
+  );
 }
+
+// The way we're checking against prevColor might introduce a bug with multiple undos
 
 function paintCell(e) {
-  applyColor = randomColorChecked ? randomRGBA() : color;
-  e.target.style.backgroundColor = applyColor;
-  writeIntermidiateMemory(e.target.id, applyColor);
+  let prevColor = e.target.style.backgroundColor || 'unset';
+  e.target.style.backgroundColor = randomColorChecked ? randomRGBA() : color;
+  if (prevColor !== e.target.style.backgroundColor) {
+    writeIntermidiateMemory(e.target.id, prevColor);
+  }
 }
 
 function clearCell(e) {
+  let prevColor = e.target.style.backgroundColor || 'unset';
   e.target.style.backgroundColor = 'unset';
+  if (prevColor !== e.target.style.backgroundColor) {
+    writeIntermidiateMemory(e.target.id, prevColor);
+  }
 }
 
 function handlePainting(e) {
-  if (isCell(e)) paintCell(e);
+  if (isCellNotInRun(e)) {
+    updateCellRun(e);
+    paintCell(e);
+  }
 }
 
 function handleClearing(e) {
   e.preventDefault();
-  if (isCell(e)) clearCell(e);
+  if (isCellNotInRun(e)) {
+    updateCellRun(e);
+    clearCell(e);
+  }
+}
+
+function handleKeyDown(e) {
+  if (e.keyCode == 90 && e.ctrlKey && undoStore.length) undo(e);
+  if (e.keyCode == 89 && e.ctrlKey && redoStore.length) redo(e);
+}
+
+// TODO: Refactor undo-redo to use objects that include both the current and previous color as properties
+
+function undo(e) {
+  let change = undoStore.pop();
+  for (const action of change) {
+    let prevColor = document.getElementById(action.cell).style.backgroundColor;
+    document.getElementById(action.cell).style.backgroundColor = action.color;
+    action.color = prevColor;
+  }
+
+  writeRedo(change);
+}
+
+function redo(e) {
+  let change = redoStore.pop();
+  for (const action of change) {
+    console.log(action);
+    document.getElementById(action.cell).style.backgroundColor = action.color;
+  }
+  console.log(change);
+  writeUndo(change);
+}
+
+function updateCellRun(e) {
+  e.target.dataset.run = currentRun;
 }
 
 function writeIntermidiateMemory(cell, color) {
@@ -88,33 +138,48 @@ function writeIntermidiateMemory(cell, color) {
   console.log(intermediateMemory);
 }
 
-function writeUndo(memory) {
-  undoStore.push(memory.pop());
+function writeUndo(change) {
+  undoStore.push(change);
 }
 
-function removeListenersAndWrite(e) {
+function writeRedo(change) {
+  redoStore.push(change);
+}
+
+function handleMouseup(e) {
+  removeListeners(e);
+
+  if (!intermediateMemory.length) {
+    if (isLeftClick(e)) {
+      handlePainting(e);
+    } else if (isRightClick(e)) {
+      handleClearing(e);
+    }
+  }
+
+  writeUndo(intermediateMemory.pop());
+}
+
+function removeListeners(e) {
   app.removeEventListener('mousemove', handlePainting);
   app.removeEventListener('mousemove', handleClearing);
-  if (intermediateMemory.length !== 0) {
-    writeUndo(intermediateMemory);
-  } else {
-    handlePainting(e);
-    writeUndo(intermediateMemory);
-  }
-  app.removeEventListener('mouseup', removeListenersAndWrite);
+  app.removeEventListener('mouseup', handleMouseup);
 }
 
 function handleMousedown(e) {
+  currentRun += 1;
   if (isLeftClick(e)) {
     app.addEventListener('mousemove', handlePainting);
   } else if (isRightClick(e)) {
     app.addEventListener('mousemove', handleClearing);
   }
 
-  app.addEventListener('mouseup', removeListenersAndWrite);
+  app.addEventListener('mouseup', handleMouseup);
 }
 
 /* Event Listeners */
+
+document.onkeydown = handleKeyDown;
 
 colorPicker.addEventListener('input', (e) => {
   color = e.target.value;
