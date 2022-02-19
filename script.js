@@ -44,6 +44,7 @@ function createGrid(rows, cols) {
     let cell = document.createElement('div');
     cell.classList.add('cell');
     cell.id = 'cell-' + count;
+    cell.dataset.run = 'initial';
     app.appendChild(cell);
   }
 }
