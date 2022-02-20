@@ -70,10 +70,11 @@ function paintCell(e) {
 }
 
 function clearCell(e) {
-  let prevColor = e.target.style.backgroundColor || 'unset';
+  let prevColor = e.target.style.backgroundColor;
+  let currColor = 'unset';
 
-  if (prevColor !== e.target.style.backgroundColor) {
-    e.target.style.backgroundColor = 'unset';
+  if (prevColor !== undefined) {
+    e.target.style.backgroundColor = currColor;
     writeIntermidiateMemory(e.target.id, prevColor, currColor);
   }
 }
