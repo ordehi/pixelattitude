@@ -1,8 +1,8 @@
 /* DOM */
 
 const grid = document.querySelector('.container');
-const rows = document.getElementById('rows');
-const cols = document.getElementById('cols');
+const rowsInput = document.getElementById('rows-input');
+const colsInput = document.getElementById('cols-input');
 
 /* Buttons */
 
@@ -80,8 +80,8 @@ function getBuffer(grid) {
 }
 
 function getPNGFromBuffer(buffer) {
-  let width = Number(rows.value);
-  let height = Number(cols.value);
+  let width = Number(rowsInput.value);
+  let height = Number(colsInput.value);
 
   let canvas = document.createElement('canvas');
   let ctx = canvas.getContext('2d');
@@ -122,6 +122,7 @@ function downloadPNG() {
 const exportPNG = debounce(() => downloadPNG());
 
 function createGrid(rows, cols) {
+  grid.textContent = '';
   grid.style.setProperty('--grid-rows', rows);
   grid.style.setProperty('--grid-cols', cols);
   for (count = 0; count < rows * cols; count += 1) {
@@ -139,7 +140,10 @@ function saveGridToLocalStorage() {
     .map((cell) => cell.id + '|' + cell.style.backgroundColor)
     .join('/');
 
-  if (saveData.length) localStorage.setItem('pixel', saveData);
+  if (saveData.length) {
+    saveData = rowsInput.value + 'x' + colsInput.value + '/' + saveData;
+    localStorage.setItem('pixel', saveData);
+  }
 }
 
 const saveGrid = debounce(() => saveGridToLocalStorage());
@@ -147,6 +151,11 @@ const saveGrid = debounce(() => saveGridToLocalStorage());
 function loadGridFromLocalStorage() {
   let strOfGrid = localStorage.getItem('pixel');
   let arrOfGrid = strOfGrid.split('/');
+  let gridSize = arrOfGrid.shift().split('x');
+  rowsInput.value = gridSize[0];
+  colsInput.value = gridSize[1];
+
+  createGrid(gridSize[0], gridSize[1]);
 
   arrOfGrid.forEach((cell) => {
     document.getElementById(cell.split('|')[0]).style.backgroundColor =
@@ -221,15 +230,12 @@ function handleKeyDown(e) {
   if (e.keyCode == 89 && e.ctrlKey && redoStore.length) redo(e);
 }
 
-// TODO: Refactor undo-redo to use objects that include both the current and previous color as properties
-
 function undo(e) {
   let change = undoStore.pop();
   for (const action of change) {
     document.getElementById(action.cell).style.backgroundColor =
       action.prevColor;
   }
-
   writeRedo(change);
 }
 
@@ -269,7 +275,6 @@ function handleMouseup(e) {
       handleClearing(e);
     }
   }
-
   writeUndo(intermediateMemory.pop());
   if (redoStore.length) redoStore.length = 0;
 }
@@ -287,7 +292,6 @@ function handleMousedown(e) {
   } else if (isRightClick(e)) {
     grid.addEventListener('mousemove', handleClearing);
   }
-
   grid.addEventListener('mouseup', handleMouseup);
 }
 
@@ -305,10 +309,9 @@ randomColorToggle.addEventListener('input', (e) => {
 
 clearBtn.addEventListener('click', (e) => {
   e.preventDefault();
-  grid.textContent = '';
-  if (rows.value > 50) rows.value = 50;
-  if (cols.value > 50) cols.value = 50;
-  createGrid(rows.value || 32, cols.value || 32);
+  if (rowsInput.value > 100) rowsInput.value = 100;
+  if (colsInput.value > 100) colsInput.value = 100;
+  createGrid(rowsInput.value || 32, colsInput.value || 32);
 });
 
 //grid.addEventListener('click', handlePainting);
