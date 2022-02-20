@@ -12,16 +12,6 @@ const redoStore = [];
 const intermediateMemory = [];
 
 let currentRun = 0;
-/* 
-Undo
-
-When something is done, the cells and their respective colors are stored as an object inside undoStore with two properties, cells and colors. Each property contains an array with the values of all cells and their respective colors.
-
-Since drag to paint will produce several cell-color pairs before the mouseup event, we should only push the values after the mouseup event, in the same listener that removes the listeners for the drag to paint action.
-
-For the click to paint action, we can do the write to undoStore on the same handler that does the click
-
-*/
 
 /* Utility Functions */
 
@@ -71,9 +61,10 @@ function isCellNotInRun(e) {
 
 function paintCell(e) {
   let prevColor = e.target.style.backgroundColor || 'unset';
-  e.target.style.backgroundColor = randomColorChecked ? randomRGBA() : color;
+  let currColor = randomColorChecked ? randomRGBA() : color;
+  e.target.style.backgroundColor = currColor;
   if (prevColor !== e.target.style.backgroundColor) {
-    writeIntermidiateMemory(e.target.id, prevColor);
+    writeIntermidiateMemory(e.target.id, prevColor, currColor);
   }
 }
 
@@ -81,7 +72,7 @@ function clearCell(e) {
   let prevColor = e.target.style.backgroundColor || 'unset';
   e.target.style.backgroundColor = 'unset';
   if (prevColor !== e.target.style.backgroundColor) {
-    writeIntermidiateMemory(e.target.id, prevColor);
+    writeIntermidiateMemory(e.target.id, prevColor, currColor);
   }
 }
 
@@ -110,9 +101,8 @@ function handleKeyDown(e) {
 function undo(e) {
   let change = undoStore.pop();
   for (const action of change) {
-    let prevColor = document.getElementById(action.cell).style.backgroundColor;
-    document.getElementById(action.cell).style.backgroundColor = action.color;
-    action.color = prevColor;
+    document.getElementById(action.cell).style.backgroundColor =
+      action.prevColor;
   }
 
   writeRedo(change);
@@ -121,10 +111,9 @@ function undo(e) {
 function redo(e) {
   let change = redoStore.pop();
   for (const action of change) {
-    console.log(action);
-    document.getElementById(action.cell).style.backgroundColor = action.color;
+    document.getElementById(action.cell).style.backgroundColor =
+      action.currColor;
   }
-  console.log(change);
   writeUndo(change);
 }
 
@@ -132,10 +121,9 @@ function updateCellRun(e) {
   e.target.dataset.run = currentRun;
 }
 
-function writeIntermidiateMemory(cell, color) {
+function writeIntermidiateMemory(cell, prevColor, currColor) {
   if (intermediateMemory.length === 0) intermediateMemory.push([]);
-  intermediateMemory[0].push({ cell, color });
-  console.log(intermediateMemory);
+  intermediateMemory[0].push({ cell, prevColor, currColor });
 }
 
 function writeUndo(change) {
@@ -158,6 +146,7 @@ function handleMouseup(e) {
   }
 
   writeUndo(intermediateMemory.pop());
+  if (redoStore.length) redoStore.length = 0;
 }
 
 function removeListeners(e) {
