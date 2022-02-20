@@ -66,7 +66,6 @@ function createGrid(rows, cols) {
 }
 
 function saveGridToLocalStorage() {
-  console.log('running save');
   let saveData = Array.from(app.children)
     .filter(
       (cell) =>
@@ -82,7 +81,6 @@ function saveGridToLocalStorage() {
 const saveGrid = debounce(() => saveGridToLocalStorage());
 
 function loadGridFromLocalStorage() {
-  console.log('running load');
   let strOfGrid = localStorage.getItem('pixel');
   let arrOfGrid = strOfGrid.split('/');
 
