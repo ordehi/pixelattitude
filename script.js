@@ -1,11 +1,23 @@
+/* DOM */
+
 const app = document.querySelector('.container');
 const rows = document.getElementById('rows');
 const cols = document.getElementById('cols');
+
+/* Buttons */
+
 const clearBtn = document.getElementById('clear-draw');
+const saveBtn = document.getElementById('save-btn');
+const loadBtn = document.getElementById('load-btn');
+
+/* Color management variables */
+
 const colorPicker = document.getElementById('color-picker');
 const randomColorToggle = document.getElementById('random-color');
 let color = colorPicker.value;
 let randomColorChecked = randomColorToggle.checked;
+
+/* Memory */
 
 const undoStore = [];
 const redoStore = [];
@@ -42,6 +54,11 @@ function createGrid(rows, cols) {
 
 /* Event Handlers */
 
+document.onsubmit = (e) => e.preventDefault();
+
+saveBtn.onclick = saveGridToLocalStorage;
+loadBtn.onclick = loadGridFromLocalStorage;
+
 function isLeftClick(e) {
   return e.button === 0;
 }
@@ -69,7 +86,7 @@ function saveGridToLocalStorage() {
     .map((cell) => cell.id + '|' + cell.style.backgroundColor)
     .join('/');
 
-  localStorage.setItem('pixel', saveData);
+  if (saveData.length) localStorage.setItem('pixel', saveData);
 }
 
 function loadGridFromLocalStorage() {
