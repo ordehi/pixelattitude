@@ -59,6 +59,29 @@ function isCellNotInRun(e) {
 
 // The way we're checking against prevColor might introduce a bug with multiple undos
 
+function saveGridToLocalStorage() {
+  let saveData = Array.from(app.children)
+    .filter(
+      (cell) =>
+        cell.dataset.run !== 'initial' &&
+        !['', 'unset'].includes(cell.style.backgroundColor)
+    )
+    .map((cell) => cell.id + '|' + cell.style.backgroundColor)
+    .join('/');
+
+  localStorage.setItem('pixel', saveData);
+}
+
+function loadGridFromLocalStorage() {
+  let strOfGrid = localStorage.getItem('pixel');
+  let arrOfGrid = strOfGrid.split('/');
+
+  arrOfGrid.forEach((cell) => {
+    document.getElementById(cell.split('|')[0]).style.backgroundColor =
+      cell.split('|')[1];
+  });
+}
+
 function paintCell(e) {
   let prevColor = e.target.style.backgroundColor || 'unset';
   let currColor = randomColorChecked ? randomRGBA() : color;
