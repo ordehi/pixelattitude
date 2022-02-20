@@ -1,6 +1,6 @@
 /* DOM */
 
-const app = document.querySelector('.container');
+const grid = document.querySelector('.container');
 const rows = document.getElementById('rows');
 const cols = document.getElementById('cols');
 
@@ -9,6 +9,7 @@ const cols = document.getElementById('cols');
 const clearBtn = document.getElementById('clear-draw');
 const saveBtn = document.getElementById('save-btn');
 const loadBtn = document.getElementById('load-btn');
+const exportBtn = document.getElementById('export-btn');
 
 /* Color management variables */
 
@@ -53,25 +54,88 @@ function randomRGBA() {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
+function getRGB(str) {
+  let match = str.match(
+    /rgba?\((\d{1,3}), ?(\d{1,3}), ?(\d{1,3})\)?(?:, ?(\d(?:\.\d?))\))?/
+  );
+  return match
+    ? [Number(match[1]), Number(match[2]), Number(match[3]), 255]
+    : [0, 0, 0, 0];
+}
+
+function getBuffer(grid) {
+  return new Uint8ClampedArray(
+    Array.from(grid.children)
+      .map((cell) => {
+        let color = cell.style.backgroundColor;
+
+        if (color === '') {
+          return [0, 0, 0, 0];
+        } else {
+          return getRGB(color);
+        }
+      })
+      .flat()
+  );
+}
+
+function getPNGFromBuffer(buffer) {
+  let width = Number(rows.value);
+  let height = Number(cols.value);
+
+  let canvas = document.createElement('canvas');
+  let ctx = canvas.getContext('2d');
+
+  canvas.width = width;
+  canvas.height = height;
+
+  let idata = ctx.createImageData(width, height);
+
+  idata.data.set(buffer);
+
+  ctx.putImageData(idata, 0, 0);
+
+  let dataUri = canvas.toDataURL();
+
+  return dataUri;
+}
+
+const download = (filename, data) => {
+  let element = document.createElement('a');
+  element.setAttribute('href', data);
+
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+};
+
+function downloadPNG() {
+  let randomSuffix = new Date().getTime();
+  download('pixel' + randomSuffix, getPNGFromBuffer(getBuffer(grid)));
+}
+
+const exportPNG = debounce(() => downloadPNG());
+
 function createGrid(rows, cols) {
-  app.style.setProperty('--grid-rows', rows);
-  app.style.setProperty('--grid-cols', cols);
+  grid.style.setProperty('--grid-rows', rows);
+  grid.style.setProperty('--grid-cols', cols);
   for (count = 0; count < rows * cols; count += 1) {
     let cell = document.createElement('div');
     cell.classList.add('cell');
     cell.id = 'cell-' + count;
     cell.dataset.run = 'initial';
-    app.appendChild(cell);
+    grid.appendChild(cell);
   }
 }
 
 function saveGridToLocalStorage() {
-  let saveData = Array.from(app.children)
-    .filter(
-      (cell) =>
-        cell.dataset.run !== 'initial' &&
-        !['', 'unset'].includes(cell.style.backgroundColor)
-    )
+  let saveData = Array.from(grid.children)
+    .filter((cell) => !['', 'unset'].includes(cell.style.backgroundColor))
     .map((cell) => cell.id + '|' + cell.style.backgroundColor)
     .join('/');
 
@@ -98,6 +162,7 @@ document.onsubmit = (e) => e.preventDefault();
 
 saveBtn.onclick = saveGrid;
 loadBtn.onclick = loadGrid;
+exportBtn.onclick = exportPNG;
 
 function isLeftClick(e) {
   return e.button === 0;
@@ -210,20 +275,20 @@ function handleMouseup(e) {
 }
 
 function removeListeners(e) {
-  app.removeEventListener('mousemove', handlePainting);
-  app.removeEventListener('mousemove', handleClearing);
-  app.removeEventListener('mouseup', handleMouseup);
+  grid.removeEventListener('mousemove', handlePainting);
+  grid.removeEventListener('mousemove', handleClearing);
+  grid.removeEventListener('mouseup', handleMouseup);
 }
 
 function handleMousedown(e) {
   currentRun += 1;
   if (isLeftClick(e)) {
-    app.addEventListener('mousemove', handlePainting);
+    grid.addEventListener('mousemove', handlePainting);
   } else if (isRightClick(e)) {
-    app.addEventListener('mousemove', handleClearing);
+    grid.addEventListener('mousemove', handleClearing);
   }
 
-  app.addEventListener('mouseup', handleMouseup);
+  grid.addEventListener('mouseup', handleMouseup);
 }
 
 /* Event Listeners */
@@ -240,21 +305,21 @@ randomColorToggle.addEventListener('input', (e) => {
 
 clearBtn.addEventListener('click', (e) => {
   e.preventDefault();
-  app.textContent = '';
+  grid.textContent = '';
   if (rows.value > 50) rows.value = 50;
   if (cols.value > 50) cols.value = 50;
   createGrid(rows.value || 32, cols.value || 32);
 });
 
-//app.addEventListener('click', handlePainting);
+//grid.addEventListener('click', handlePainting);
 
-app.addEventListener('mousedown', handleMousedown);
+grid.addEventListener('mousedown', handleMousedown);
 
-app.addEventListener('contextmenu', handleClearing);
+grid.addEventListener('contextmenu', handleClearing);
 
 // Prevent dragging to avoid glitchy drawing
 
-app.addEventListener('dragstart', (e) => {
+grid.addEventListener('dragstart', (e) => {
   e.preventDefault();
 });
 
