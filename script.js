@@ -62,16 +62,18 @@ function isCellNotInRun(e) {
 function paintCell(e) {
   let prevColor = e.target.style.backgroundColor || 'unset';
   let currColor = randomColorChecked ? randomRGBA() : color;
-  e.target.style.backgroundColor = currColor;
+
   if (prevColor !== e.target.style.backgroundColor) {
+    e.target.style.backgroundColor = currColor;
     writeIntermidiateMemory(e.target.id, prevColor, currColor);
   }
 }
 
 function clearCell(e) {
   let prevColor = e.target.style.backgroundColor || 'unset';
-  e.target.style.backgroundColor = 'unset';
+
   if (prevColor !== e.target.style.backgroundColor) {
+    e.target.style.backgroundColor = 'unset';
     writeIntermidiateMemory(e.target.id, prevColor, currColor);
   }
 }
