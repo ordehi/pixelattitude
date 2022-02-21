@@ -27,19 +27,26 @@ header {
   border: 1px solid white;
 } */
 
-.content {
+/* .content {
   display: flex;
   flex-direction: column;
   align-items: center;
+} */
+
+.app {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
-.container {
+.grid-container {
   /* padding: 1em;
   margin: auto;
   width: fit-content; */
   display: grid;
   grid-template-rows: repeat(var(--grid-rows), 1fr);
   grid-template-columns: repeat(var(--grid-cols), 0fr);
+  margin: 1em 0;
 }
 
 .cell {
@@ -55,8 +62,7 @@ header {
 
 #grid-config {
   display: flex;
-  justify-content: center;
-  margin: auto;
+  align-items: baseline;
 }
 
 /* input, textarea, button, select {
@@ -101,8 +107,9 @@ header {
   font-weight: var(--font-weight-9);
   font-family: var(--font-sans);
   box-shadow: var(--shadow-4);
-  margin-bottom: 20px;
   width: 100%;
+  display: flex;
+  align-items: center;
 }
 
 button {
@@ -118,9 +125,7 @@ button:hover {
 }
 
 .title {
-  position: absolute;
-  top: 5%;
-  left: 5%;
+  padding-left: 1em;
 }
 
 @media (prefers-color-scheme: dark) {

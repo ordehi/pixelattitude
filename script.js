@@ -1,6 +1,6 @@
 /* DOM */
 
-const grid = document.querySelector('.container');
+const grid = document.querySelector('.grid-container');
 const rowsInput = document.getElementById('rows-input');
 const colsInput = document.getElementById('cols-input');
 
