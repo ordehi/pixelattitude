@@ -28,6 +28,10 @@ let currentRun = 0;
 
 /* Utility Functions */
 
+/* 
+To prevent multiple consecutive writes/reads from storage
+Idea from https://www.freecodecamp.org/news/javascript-debounce-example/
+ */
 function debounce(func, timeout = 300) {
   let timer;
   return (...args) => {
@@ -41,10 +45,12 @@ function debounce(func, timeout = 300) {
   };
 }
 
+/* Get a random number from 0 to 255 to use as RGB values */
 function random255() {
   return Math.floor(Math.random() * 255);
 }
 
+/* Get a random RGBA value */
 function randomRGBA() {
   let r = random255();
   let g = random255();
@@ -54,7 +60,8 @@ function randomRGBA() {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-function getRGB(str) {
+/* Extract RGB values from a string */
+function extractRGB(str) {
   let match = str.match(
     /rgba?\((\d{1,3}), ?(\d{1,3}), ?(\d{1,3})\)?(?:, ?(\d(?:\.\d?))\))?/
   );
@@ -63,6 +70,9 @@ function getRGB(str) {
     : [0, 0, 0, 0];
 }
 
+/*
+ Creates a Uint8ClampedArray from the current grid to use as the basis for the PNG  to export. More on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray
+*/
 function getBuffer(grid) {
   return new Uint8ClampedArray(
     Array.from(grid.children)
@@ -79,6 +89,9 @@ function getBuffer(grid) {
   );
 }
 
+/*
+ Creates a PNG based on a Uint8ClampedArray that has 'grid cells * 4' bits to accommodate 4 bits per RGBA value (per cell). Needs attribution, I misplaced the StackOverflow answer that gave me the initial idea.
+*/
 function getPNGFromBuffer(buffer) {
   let width = Number(rowsInput.value);
   let height = Number(colsInput.value);
@@ -100,20 +113,19 @@ function getPNGFromBuffer(buffer) {
   return dataUri;
 }
 
+/* Create an invisible anchor element on the document that contains the PNG data, is clicked to download, and then removed from the document. */
 const download = (filename, data) => {
-  let element = document.createElement('a');
-  element.setAttribute('href', data);
+  let anchor = document.createElement('a');
+  anchor.setAttribute('href', data);
+  anchor.setAttribute('download', filename);
+  anchor.style.display = 'none';
 
-  element.setAttribute('download', filename);
-
-  element.style.display = 'none';
-  document.body.appendChild(element);
-
-  element.click();
-
-  document.body.removeChild(element);
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
 };
 
+/* Adds a random suffix based on the current epoch milliseconds (we can likely do better) and calls download with the filename and the return from getPNGFromBuffer(getBuffer(grid)) or a png as a base64 URI */
 function downloadPNG() {
   let randomSuffix = new Date().getTime();
   download('pixel' + randomSuffix, getPNGFromBuffer(getBuffer(grid)));
@@ -121,6 +133,7 @@ function downloadPNG() {
 
 const exportPNG = debounce(() => downloadPNG());
 
+/* Creates a grid given rows and cols integers for width and height */
 function createGrid(rows, cols) {
   grid.textContent = '';
   grid.style.setProperty('--grid-rows', rows);
@@ -134,6 +147,7 @@ function createGrid(rows, cols) {
   }
 }
 
+/* Saves grid to localStorage by getting all children of the grid element that contain colors and stringifying that so it can be stored */
 function saveGridToLocalStorage() {
   let saveData = Array.from(grid.children)
     .filter((cell) => !['', 'unset'].includes(cell.style.backgroundColor))
@@ -148,6 +162,10 @@ function saveGridToLocalStorage() {
 
 const saveGrid = debounce(() => saveGridToLocalStorage());
 
+/* 
+Loads a grid from localStorage if present, 
+TODO: fix Issue #2, loading when no save file present throws a console error
+ */
 function loadGridFromLocalStorage() {
   let strOfGrid = localStorage.getItem('pixel');
   let arrOfGrid = strOfGrid.split('/');
@@ -173,6 +191,7 @@ saveBtn.onclick = saveGrid;
 loadBtn.onclick = loadGrid;
 exportBtn.onclick = exportPNG;
 
+/* isLeftClick and isRightClick check whether the mouse button being pressed is left or right, it's not infallible as it uses MouseEvent.button which may point to different buttons on some remapped devices, but it'll do for now */
 function isLeftClick(e) {
   return e.button === 0;
 }
@@ -181,6 +200,7 @@ function isRightClick(e) {
   return e.button === 2;
 }
 
+/* Checks if the current cell being moused over is in the current run (the current painting movement before the mouseup event), this is to prevent trying to paint over a cell multiple times and filling up memory with duplicates */
 function isCellNotInRun(e) {
   return (
     e.target.classList.contains('cell') &&
@@ -188,8 +208,9 @@ function isCellNotInRun(e) {
   );
 }
 
-// The way we're checking against prevColor might introduce a bug with multiple undos
-
+/* 
+Stores the previous color of the current cell, and determines the current color to replace the previous by either using the selected color in the GUI or a random RGBA value if Use Random Color is checked in the GUI. Only paints if the previous color is not the same as the current color (we probably need to change this)
+ */
 function paintCell(e) {
   let prevColor = e.target.style.backgroundColor || 'unset';
   let currColor = randomColorChecked ? randomRGBA() : color;
@@ -200,6 +221,7 @@ function paintCell(e) {
   }
 }
 
+/* Clears a cell from color which currently happens when right-click is pressed on a cell (or held and moused over multiple cells). We probably want to abstract the prevColor - currColor deal to a separate process */
 function clearCell(e) {
   let prevColor = e.target.style.backgroundColor;
   let currColor = 'unset';
@@ -210,6 +232,7 @@ function clearCell(e) {
   }
 }
 
+/* Paints only if the current cell hasn't been painted over during the current run. This is probably the root of the not being able to paint over painted cells issue #1 */
 function handlePainting(e) {
   if (isCellNotInRun(e)) {
     updateCellRun(e);
@@ -225,11 +248,13 @@ function handleClearing(e) {
   }
 }
 
+/* Runs undo or redo functions based on whether CTRL + Z or CTRL + Y are pressed, and if there's data on undoStore/redoStore */
 function handleKeyDown(e) {
   if (e.keyCode == 90 && e.ctrlKey && undoStore.length) undo(e);
   if (e.keyCode == 89 && e.ctrlKey && redoStore.length) redo(e);
 }
 
+/* undoes the last action by getting the relevant data from undoStore and painting the grid with it */
 function undo(e) {
   let change = undoStore.pop();
   for (const action of change) {
@@ -239,6 +264,7 @@ function undo(e) {
   writeRedo(change);
 }
 
+/* redoes last undo, only works if no action has been done after the last undo */
 function redo(e) {
   let change = redoStore.pop();
   for (const action of change) {
@@ -248,15 +274,18 @@ function redo(e) {
   writeUndo(change);
 }
 
+/* Updates the currentRun variable, which represents the current painting movement being carried out to prevent the same cells from being painted multiple times. Likely involved in Issue #1 */
 function updateCellRun(e) {
   e.target.dataset.run = currentRun;
 }
 
+/* Writes an intermediate memory that is a store of all the cells being painted while mousedown is held, once mouseup happens, we commit intermediateMemory to undoStore */
 function writeIntermidiateMemory(cell, prevColor, currColor) {
   if (intermediateMemory.length === 0) intermediateMemory.push([]);
   intermediateMemory[0].push({ cell, prevColor, currColor });
 }
 
+/* writeUndo and writeRedo push intermediateMemory to their respective stores */
 function writeUndo(change) {
   undoStore.push(change);
 }
@@ -265,6 +294,7 @@ function writeRedo(change) {
   redoStore.push(change);
 }
 
+/* We need to remove event listeners that paint and clear cells once we hear mouseup because otherwise you might end up painting indefinitely, or clearing when you meant to paint. There's probably a solution we should adopt instead of this. */
 function handleMouseup(e) {
   removeListeners(e);
 
@@ -285,6 +315,7 @@ function removeListeners(e) {
   grid.removeEventListener('mouseup', handleMouseup);
 }
 
+/* While mousedown is happening, either painting or clearing cells must happen */
 function handleMousedown(e) {
   currentRun += 1;
   if (isLeftClick(e)) {
