@@ -25,7 +25,7 @@ Go to the 'Code' dropdown at the top and click on 'Download ZIP', unzip all file
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on the process for submitting pull requests to us. Be aware that there's a contribution checklist (found in that file) you should include in any issues/pull requests you submit. Also, read our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Versioning
 
