@@ -15,7 +15,7 @@ const exportBtn = document.getElementById('export-btn');
 
 const colorPicker = document.getElementById('color-picker');
 const randomColorToggle = document.getElementById('random-color');
-let color = colorPicker.value;
+let chosenColor = rgbaArrToStr(hexStrToRGBArr(colorPicker.value));
 let randomColorChecked = randomColorToggle.checked;
 
 /* Memory */
@@ -60,14 +60,28 @@ function randomRGBA() {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
+function hexStrToRGBArr(hashHex) {
+  let hex = hashHex[0] === '#' ? hashHex.substring(1) : hashHex;
+  return hex.match(/.{1,2}/g).map((hexVal) => parseInt(hexVal, 16));
+}
+
 /* Extract RGB values from a string */
-function extractRGB(str) {
-  let match = str.match(
+function rgbStrToArr(strRGB = '') {
+  let match = strRGB.match(
     /rgba?\((\d{1,3}), ?(\d{1,3}), ?(\d{1,3})\)?(?:, ?(\d(?:\.\d?))\))?/
   );
-  return match
-    ? [Number(match[1]), Number(match[2]), Number(match[3]), 255]
-    : [0, 0, 0, 0];
+  return match ? match.map((val) => Number(val)) : [0, 0, 0];
+}
+
+function rgbaArrToStr(arr = [0, 0, 0, 0]) {
+  return arr.length === 4
+    ? 'rgba(' + arr.join(', ') + ')'
+    : 'rgb(' + arr.join(', ') + ')';
+}
+
+function hexStrToRGBArr(strHex = '') {
+  let match = strHex.match(/[^#]{1,2}/g);
+  return match ? match.map((hexVal) => parseInt(hexVal, 16)) : [0, 0, 0, 0];
 }
 
 /*
@@ -78,12 +92,7 @@ function getBuffer(grid) {
     Array.from(grid.children)
       .map((cell) => {
         let color = cell.style.backgroundColor;
-
-        if (color === '') {
-          return [0, 0, 0, 0];
-        } else {
-          return extractRGB(color);
-        }
+        return color ? [...rgbStrToArr(color), 255] : [0, 0, 0, 0];
       })
       .flat()
   );
@@ -211,9 +220,9 @@ Stores the previous color of the current cell, and determines the current color 
  */
 function paintCell(e) {
   let prevColor = e.target.style.backgroundColor || '';
-  let currColor = randomColorChecked ? randomRGBA() : color;
+  let currColor = randomColorChecked ? randomRGBA() : chosenColor;
 
-  if (currColor !== e.target.style.backgroundColor) {
+  if (currColor !== prevColor) {
     e.target.style.backgroundColor = currColor;
     writeIntermidiateMemory(e.target.id, prevColor, currColor);
   }
@@ -222,9 +231,9 @@ function paintCell(e) {
 /* Clears a cell from color which currently happens when right-click is pressed on a cell (or held and moused over multiple cells). We probably want to abstract the prevColor - currColor deal to a separate process */
 function clearCell(e) {
   let prevColor = e.target.style.backgroundColor;
-  let currColor = 'unset';
+  let currColor = '';
 
-  if (prevColor !== undefined) {
+  if (prevColor) {
     e.target.style.backgroundColor = currColor;
     writeIntermidiateMemory(e.target.id, prevColor, currColor);
   }
@@ -281,7 +290,6 @@ function updateCellRun(e) {
 function writeIntermidiateMemory(cell, prevColor, currColor) {
   if (intermediateMemory.length === 0) intermediateMemory.push([]);
   intermediateMemory[0].push({ cell, prevColor, currColor });
-  console.log(intermediateMemory);
 }
 
 /* writeUndo and writeRedo push intermediateMemory to their respective stores */
@@ -330,7 +338,7 @@ function handleMousedown(e) {
 document.onkeydown = handleKeyDown;
 
 colorPicker.addEventListener('input', (e) => {
-  color = e.target.value;
+  chosenColor = rgbaArrToStr(hexStrToRGBArr(e.target.value));
 });
 
 randomColorToggle.addEventListener('input', (e) => {
