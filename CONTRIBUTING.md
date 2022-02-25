@@ -25,3 +25,11 @@ There's a guide here on how to contribute to Open Source projects if, like me, y
 5. Push it back to your repo
 6. Click the Compare & pull request button
 7. Click Create pull request to open a new pull request
+
+## Contribution checklist
+
+When opening an issue or pull request, please use this template in your comment:
+
+- [ ] I have read the contribution guidelines at [CONTRIBUTING.md](CONTRIBUTING.md)
+- [ ] I have checked other issues/PRs to make sure this is not a duplicate
+- [ ] I agree that my contribution is subject to this project's [MIT License](LICENSE.md)
