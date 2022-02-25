@@ -181,7 +181,9 @@ function loadGridFromLocalStorage() {
   });
 }
 
-const loadGrid = debounce(() => loadGridFromLocalStorage());
+const loadGrid = debounce(() => {
+  if (localStorage.getItem('pixel')) loadGridFromLocalStorage();
+});
 
 /* Event Handlers */
 
