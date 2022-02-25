@@ -164,7 +164,6 @@ const saveGrid = debounce(() => saveGridToLocalStorage());
 
 /* 
 Loads a grid from localStorage if present, 
-TODO: fix Issue #2, loading when no save file present throws a console error
  */
 function loadGridFromLocalStorage() {
   let strOfGrid = localStorage.getItem('pixel');
