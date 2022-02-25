@@ -15,7 +15,7 @@ const exportBtn = document.getElementById('export-btn');
 
 const colorPicker = document.getElementById('color-picker');
 const randomColorToggle = document.getElementById('random-color');
-let color = colorPicker.value;
+let chosenColor = rgbaArrToStr(hexStrToRGBArr(colorPicker.value));
 let randomColorChecked = randomColorToggle.checked;
 
 /* Memory */
@@ -60,14 +60,28 @@ function randomRGBA() {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
+function hexStrToRGBArr(hashHex) {
+  let hex = hashHex[0] === '#' ? hashHex.substring(1) : hashHex;
+  return hex.match(/.{1,2}/g).map((hexVal) => parseInt(hexVal, 16));
+}
+
 /* Extract RGB values from a string */
-function extractRGB(str) {
-  let match = str.match(
+function rgbStrToArr(strRGB = '') {
+  let match = strRGB.match(
     /rgba?\((\d{1,3}), ?(\d{1,3}), ?(\d{1,3})\)?(?:, ?(\d(?:\.\d?))\))?/
   );
-  return match
-    ? [Number(match[1]), Number(match[2]), Number(match[3]), 255]
-    : [0, 0, 0, 0];
+  return match ? match.map((val) => Number(val)) : [0, 0, 0];
+}
+
+function rgbaArrToStr(arr = [0, 0, 0, 0]) {
+  return arr.length === 4
+    ? 'rgba(' + arr.join(', ') + ')'
+    : 'rgb(' + arr.join(', ') + ')';
+}
+
+function hexStrToRGBArr(strHex = '') {
+  let match = strHex.match(/[^#]{1,2}/g);
+  return match ? match.map((hexVal) => parseInt(hexVal, 16)) : [0, 0, 0, 0];
 }
 
 /*
@@ -78,12 +92,7 @@ function getBuffer(grid) {
     Array.from(grid.children)
       .map((cell) => {
         let color = cell.style.backgroundColor;
-
-        if (color === '') {
-          return [0, 0, 0, 0];
-        } else {
-          return extractRGB(color);
-        }
+        return color ? [...rgbStrToArr(color), 255] : [0, 0, 0, 0];
       })
       .flat()
   );
@@ -202,21 +211,18 @@ function isRightClick(e) {
 }
 
 /* Checks if the current cell being moused over is in the current run (the current painting movement before the mouseup event), this is to prevent trying to paint over a cell multiple times and filling up memory with duplicates */
-function isCellNotInRun(e) {
-  return (
-    e.target.classList.contains('cell') &&
-    e.target.dataset.run !== String(currentRun)
-  );
+function isCell(e) {
+  return e.target.classList.contains('cell');
 }
 
 /* 
 Stores the previous color of the current cell, and determines the current color to replace the previous by either using the selected color in the GUI or a random RGBA value if Use Random Color is checked in the GUI. Only paints if the previous color is not the same as the current color (we probably need to change this)
  */
 function paintCell(e) {
-  let prevColor = e.target.style.backgroundColor || 'unset';
-  let currColor = randomColorChecked ? randomRGBA() : color;
+  let prevColor = e.target.style.backgroundColor || '';
+  let currColor = randomColorChecked ? randomRGBA() : chosenColor;
 
-  if (prevColor !== e.target.style.backgroundColor) {
+  if (currColor !== prevColor) {
     e.target.style.backgroundColor = currColor;
     writeIntermidiateMemory(e.target.id, prevColor, currColor);
   }
@@ -225,9 +231,9 @@ function paintCell(e) {
 /* Clears a cell from color which currently happens when right-click is pressed on a cell (or held and moused over multiple cells). We probably want to abstract the prevColor - currColor deal to a separate process */
 function clearCell(e) {
   let prevColor = e.target.style.backgroundColor;
-  let currColor = 'unset';
+  let currColor = '';
 
-  if (prevColor !== undefined) {
+  if (prevColor) {
     e.target.style.backgroundColor = currColor;
     writeIntermidiateMemory(e.target.id, prevColor, currColor);
   }
@@ -235,7 +241,7 @@ function clearCell(e) {
 
 /* Paints only if the current cell hasn't been painted over during the current run. This is probably the root of the not being able to paint over painted cells issue #1 */
 function handlePainting(e) {
-  if (isCellNotInRun(e)) {
+  if (isCell(e)) {
     updateCellRun(e);
     paintCell(e);
   }
@@ -243,7 +249,7 @@ function handlePainting(e) {
 
 function handleClearing(e) {
   e.preventDefault();
-  if (isCellNotInRun(e)) {
+  if (isCell(e)) {
     updateCellRun(e);
     clearCell(e);
   }
@@ -332,7 +338,7 @@ function handleMousedown(e) {
 document.onkeydown = handleKeyDown;
 
 colorPicker.addEventListener('input', (e) => {
-  color = e.target.value;
+  chosenColor = rgbaArrToStr(hexStrToRGBArr(e.target.value));
 });
 
 randomColorToggle.addEventListener('input', (e) => {
