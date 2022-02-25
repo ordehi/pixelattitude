@@ -202,21 +202,18 @@ function isRightClick(e) {
 }
 
 /* Checks if the current cell being moused over is in the current run (the current painting movement before the mouseup event), this is to prevent trying to paint over a cell multiple times and filling up memory with duplicates */
-function isCellNotInRun(e) {
-  return (
-    e.target.classList.contains('cell') &&
-    e.target.dataset.run !== String(currentRun)
-  );
+function isCell(e) {
+  return e.target.classList.contains('cell');
 }
 
 /* 
 Stores the previous color of the current cell, and determines the current color to replace the previous by either using the selected color in the GUI or a random RGBA value if Use Random Color is checked in the GUI. Only paints if the previous color is not the same as the current color (we probably need to change this)
  */
 function paintCell(e) {
-  let prevColor = e.target.style.backgroundColor || 'unset';
+  let prevColor = e.target.style.backgroundColor || '';
   let currColor = randomColorChecked ? randomRGBA() : color;
 
-  if (prevColor !== e.target.style.backgroundColor) {
+  if (currColor !== e.target.style.backgroundColor) {
     e.target.style.backgroundColor = currColor;
     writeIntermidiateMemory(e.target.id, prevColor, currColor);
   }
@@ -235,7 +232,7 @@ function clearCell(e) {
 
 /* Paints only if the current cell hasn't been painted over during the current run. This is probably the root of the not being able to paint over painted cells issue #1 */
 function handlePainting(e) {
-  if (isCellNotInRun(e)) {
+  if (isCell(e)) {
     updateCellRun(e);
     paintCell(e);
   }
@@ -243,7 +240,7 @@ function handlePainting(e) {
 
 function handleClearing(e) {
   e.preventDefault();
-  if (isCellNotInRun(e)) {
+  if (isCell(e)) {
     updateCellRun(e);
     clearCell(e);
   }
@@ -284,6 +281,7 @@ function updateCellRun(e) {
 function writeIntermidiateMemory(cell, prevColor, currColor) {
   if (intermediateMemory.length === 0) intermediateMemory.push([]);
   intermediateMemory[0].push({ cell, prevColor, currColor });
+  console.log(intermediateMemory);
 }
 
 /* writeUndo and writeRedo push intermediateMemory to their respective stores */
