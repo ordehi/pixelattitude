@@ -82,7 +82,7 @@ function getBuffer(grid) {
         if (color === '') {
           return [0, 0, 0, 0];
         } else {
-          return getRGB(color);
+          return extractRGB(color);
         }
       })
       .flat()
