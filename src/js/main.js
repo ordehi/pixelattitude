@@ -10,6 +10,18 @@ const {
 } = Constants;
 
 import { createGrid } from './controllers/GridController.js';
+import { paintCell, clearCell } from './controllers/DrawingController.js';
+import {
+  debounce,
+  random255,
+  randomRGBA,
+  rgbStrToArr,
+  rgbaArrToStr,
+  hexStrToRGBArr,
+} from './Helpers.js';
+
+import { Memory } from './controllers/MemoryController.js';
+const appMemory = new Memory();
 
 /* DOM */
 
@@ -33,69 +45,7 @@ let randomColorChecked = randomColorToggle.checked;
 
 /* Memory */
 
-const undoStore = [];
-const redoStore = [];
-const intermediateMemory = [];
-
 let currentRun = 0;
-
-/* Utility Functions */
-
-/* 
-To prevent multiple consecutive writes/reads from storage
-Idea from https://www.freecodecamp.org/news/javascript-debounce-example/
- */
-function debounce(func, timeout = 300) {
-  let timer;
-  return (...args) => {
-    if (!timer) {
-      func.apply(this, args);
-    }
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      timer = undefined;
-    }, timeout);
-  };
-}
-
-/* Get a random number from 0 to 255 to use as RGB values */
-function random255() {
-  return Math.floor(Math.random() * 255);
-}
-
-/* Get a random RGBA value */
-function randomRGBA() {
-  let r = random255();
-  let g = random255();
-  let b = random255();
-  let a = Math.random().toFixed(1);
-
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
-}
-
-// function hexStrToRGBArr(hashHex) {
-//   let hex = hashHex[0] === '#' ? hashHex.substring(1) : hashHex;
-//   return hex.match(/.{1,2}/g).map((hexVal) => parseInt(hexVal, 16));
-// }
-
-/* Extract RGB values from a string */
-function rgbStrToArr(strRGB = '') {
-  let match = strRGB.match(
-    /rgba?\((\d{1,3}), ?(\d{1,3}), ?(\d{1,3})\)?(?:, ?(\d(?:\.\d?))\))?/
-  );
-  return match ? match.map((val) => Number(val)) : [0, 0, 0];
-}
-
-function rgbaArrToStr(arr = [0, 0, 0, 0]) {
-  return arr.length === 4
-    ? 'rgba(' + arr.join(', ') + ')'
-    : 'rgb(' + arr.join(', ') + ')';
-}
-
-function hexStrToRGBArr(strHex = '') {
-  let match = strHex.match(/[^#]{1,2}/g);
-  return match ? match.map((hexVal) => parseInt(hexVal, 16)) : [0, 0, 0, 0];
-}
 
 /*
  Creates a Uint8ClampedArray from the current grid to use as the basis for the PNG  to export. More on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray
@@ -214,70 +164,65 @@ function isCell(e) {
   return e.target.classList.contains('cell');
 }
 
-/* 
-Stores the previous color of the current cell, and determines the current color to replace the previous by either using the selected color in the GUI or a random RGBA value if Use Random Color is checked in the GUI. Only paints if the previous color is not the same as the current color (we probably need to change this)
- */
-function paintCell(e) {
+function getColors(e, isClearing = false) {
   let prevColor = e.target.style.backgroundColor || '';
-  let currColor = randomColorChecked ? randomRGBA() : chosenColor;
-
-  if (currColor !== prevColor) {
-    e.target.style.backgroundColor = currColor;
-    writeIntermidiateMemory(e.target.id, prevColor, currColor);
-  }
+  return isClearing
+    ? { prevColor, currColor: '' }
+    : { prevColor, currColor: randomColorChecked ? randomRGBA() : chosenColor };
 }
 
-/* Clears a cell from color which currently happens when right-click is pressed on a cell (or held and moused over multiple cells). We probably want to abstract the prevColor - currColor deal to a separate process */
-function clearCell(e) {
-  let prevColor = e.target.style.backgroundColor;
-  let currColor = '';
-
-  if (prevColor) {
-    e.target.style.backgroundColor = currColor;
-    writeIntermidiateMemory(e.target.id, prevColor, currColor);
-  }
+function colorsAreDifferent(colors) {
+  return colors.currColor !== colors.prevColor;
 }
 
 /* Paints only if the current cell hasn't been painted over during the current run. This is probably the root of the not being able to paint over painted cells issue #1 */
 function handlePainting(e) {
   if (isCell(e)) {
-    updateCellRun(e);
-    paintCell(e);
+    let colors = getColors(e);
+    if (colorsAreDifferent(colors)) {
+      let id = e.target.id;
+      updateCellRun(e);
+      paintCell(e, colors.currColor);
+      appMemory.writeIntermidiateMemory({ id, ...colors });
+    }
   }
 }
 
 function handleClearing(e) {
   e.preventDefault();
   if (isCell(e)) {
-    updateCellRun(e);
-    clearCell(e);
+    let colors = getColors(e, true);
+    if (colorsAreDifferent(colors)) {
+      let id = e.target.id;
+      updateCellRun(e);
+      clearCell(e);
+      appMemory.writeIntermidiateMemory({ id, ...colors });
+    }
   }
 }
 
 /* Runs undo or redo functions based on whether CTRL + Z or CTRL + Y are pressed, and if there's data on undoStore/redoStore */
 function handleKeyDown(e) {
-  if (e.keyCode == 90 && e.ctrlKey && undoStore.length) undo(e);
-  if (e.keyCode == 89 && e.ctrlKey && redoStore.length) redo(e);
+  if (e.keyCode == 90 && e.ctrlKey && appMemory.undoStore.length) undo(e);
+  if (e.keyCode == 89 && e.ctrlKey && appMemory.redoStore.length) redo(e);
 }
 
-/* undoes the last action by getting the relevant data from undoStore and painting the grid with it */
+/* undoes the last cell by getting the relevant data from undoStore and painting the grid with it */
 function undo(e) {
-  let change = undoStore.pop();
-  for (const action of change) {
-    document.getElementById(action.cell).style.backgroundColor =
-      action.prevColor;
+  let change = appMemory.undoStore.pop();
+  for (const cell of change) {
+    document.getElementById(cell.id).style.backgroundColor = cell.prevColor;
   }
-  writeRedo(change);
+  appMemory.redoStore.push(change);
 }
 
-/* redoes last undo, only works if no action has been done after the last undo */
+/* redoes last undo, only works if no cell has been done after the last undo */
 function redo(e) {
-  let change = redoStore.pop();
-  for (const action of change) {
-    document.getElementById(action.cell).style.backgroundColor =
-      action.currColor;
+  let change = appMemory.redoStore.pop();
+  for (const cell of change) {
+    document.getElementById(cell.id).style.backgroundColor = cell.currColor;
   }
-  writeUndo(change);
+  appMemory.undoStore.push(change);
 }
 
 /* Updates the currentRun variable, which represents the current painting movement being carried out to prevent the same cells from being painted multiple times. Likely involved in Issue #1 */
@@ -285,34 +230,19 @@ function updateCellRun(e) {
   e.target.dataset.run = currentRun;
 }
 
-/* Writes an intermediate memory that is a store of all the cells being painted while mousedown is held, once mouseup happens, we commit intermediateMemory to undoStore */
-function writeIntermidiateMemory(cell, prevColor, currColor) {
-  if (intermediateMemory.length === 0) intermediateMemory.push([]);
-  intermediateMemory[0].push({ cell, prevColor, currColor });
-}
-
-/* writeUndo and writeRedo push intermediateMemory to their respective stores */
-function writeUndo(change) {
-  undoStore.push(change);
-}
-
-function writeRedo(change) {
-  redoStore.push(change);
-}
-
 /* We need to remove event listeners that paint and clear cells once we hear mouseup because otherwise you might end up painting indefinitely, or clearing when you meant to paint. There's probably a solution we should adopt instead of this. */
 function handleMouseup(e) {
   removeListeners(e);
 
-  if (!intermediateMemory.length) {
+  if (!appMemory.intermediateMemory.length) {
     if (isLeftClick(e)) {
       handlePainting(e);
     } else if (isRightClick(e)) {
       handleClearing(e);
     }
   }
-  writeUndo(intermediateMemory.pop());
-  if (redoStore.length) redoStore.length = 0;
+  appMemory.undoStore.push(appMemory.intermediateMemory.pop());
+  if (appMemory.redoStore.length) appMemory.redoStore.length = 0;
 }
 
 function removeListeners(e) {
@@ -348,7 +278,7 @@ clearBtn.addEventListener('click', (e) => {
   e.preventDefault();
   if (rowsInput.value > MAX_HEIGHT) rowsInput.value = MAX_HEIGHT;
   if (colsInput.value > MAX_WIDTH) colsInput.value = MAX_WIDTH;
-  createGrid(rowsInput.value || HEIGHT, colsInput.value || WIDTH);
+  createGrid(grid, rowsInput.value || HEIGHT, colsInput.value || WIDTH);
 });
 
 //grid.addEventListener('click', handlePainting);
