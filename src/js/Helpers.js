@@ -42,7 +42,7 @@ export function rgbStrToArr(strRGB = '') {
   let match = strRGB.match(
     /rgba?\((\d{1,3}), ?(\d{1,3}), ?(\d{1,3})\)?(?:, ?(\d(?:\.\d?))\))?/
   );
-  return match ? match.map((val) => Number(val)) : [0, 0, 0];
+  return match ? [match[1], match[2], match[3]] : [0, 0, 0];
 }
 
 export function rgbaArrToStr(arr = [0, 0, 0, 0]) {

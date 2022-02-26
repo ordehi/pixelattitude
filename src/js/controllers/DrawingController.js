@@ -1,4 +1,6 @@
 /* Checks if the current cell being moused over is in the current run (the current painting movement before the mouseup event), this is to prevent trying to paint over a cell multiple times and filling up memory with duplicates */
+import { randomRGBA } from '../Helpers.js';
+
 function isCell(e) {
   return e.target.classList.contains('cell');
 }

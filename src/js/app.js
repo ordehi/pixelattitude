@@ -16,8 +16,6 @@ import {
 } from './controllers/DrawingController.js';
 import {
   debounce,
-  random255,
-  randomRGBA,
   rgbStrToArr,
   rgbaArrToStr,
   hexStrToRGBArr,
@@ -57,7 +55,7 @@ window.currentRun = 0;
  Creates a Uint8ClampedArray from the current grid to use as the basis for the PNG  to export. More on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray
 */
 function getBuffer(grid) {
-  return new Uint8ClampedArray(
+  let buffer = new Uint8ClampedArray(
     Array.from(grid.children)
       .map((cell) => {
         let color = cell.style.backgroundColor;
@@ -65,6 +63,8 @@ function getBuffer(grid) {
       })
       .flat()
   );
+
+  return buffer;
 }
 
 /*
