@@ -9,6 +9,8 @@ const {
   RIGHT_BUTTON,
 } = Constants;
 
+import { createGrid } from './controllers/GridController.js';
+
 /* DOM */
 
 const grid = document.querySelector('.grid-container');
@@ -152,20 +154,6 @@ function downloadPNG() {
 }
 
 const exportPNG = debounce(() => downloadPNG());
-
-/* Creates a grid given rows and cols integers for width and height */
-function createGrid(rows, cols) {
-  grid.textContent = '';
-  grid.style.setProperty('--grid-rows', rows);
-  grid.style.setProperty('--grid-cols', cols);
-  for (let count = 0; count < rows * cols; count += 1) {
-    let cell = document.createElement('div');
-    cell.classList.add('cell');
-    cell.id = 'cell-' + count;
-    cell.dataset.run = 'initial';
-    grid.appendChild(cell);
-  }
-}
 
 /* Saves grid to localStorage by getting all children of the grid element that contain colors and stringifying that so it can be stored */
 function saveGridToLocalStorage() {
@@ -377,4 +365,4 @@ grid.addEventListener('dragstart', (e) => {
 
 /* Lifecycle */
 
-createGrid(HEIGHT, WIDTH);
+createGrid(grid, HEIGHT, WIDTH);
