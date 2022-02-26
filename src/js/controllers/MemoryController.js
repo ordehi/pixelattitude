@@ -8,33 +8,21 @@ export class Memory {
     this.intermediateMemory[0].push(change);
   }
 
-  // undo(change) {
-  //   this.undoStore.push(change);
-  // }
+  /* undoes the last cell by getting the relevant data from undoStore and painting the grid with it */
+  undo() {
+    let change = this.undoStore.pop();
+    for (const cell of change) {
+      document.getElementById(cell.id).style.backgroundColor = cell.prevColor;
+    }
+    this.redoStore.push(change);
+  }
 
-  // redo(change) {
-  //   this.redoStore.push(change);
-  // }
-
-  // intermediate(change) {
-  //   if (this.intermediateMemory.length === 0) this.intermediateMemory.push([]);
-  //   this.intermediateMemory[0].push(change);
-  // }
+  /* redoes last undo, only works if no cell has been done after the last undo */
+  redo() {
+    let change = this.redoStore.pop();
+    for (const cell of change) {
+      document.getElementById(cell.id).style.backgroundColor = cell.currColor;
+    }
+    this.undoStore.push(change);
+  }
 }
-
-// export const MemoryController = {
-//   /* Writes an intermediate memory that is a store of all the cells being painted while mousedown is held, once mouseup happens, we commit intermediateMemory to undoStore */
-//   writeIntermidiateMemory: (change) => {
-//     if (intermediateMemory.length === 0) intermediateMemory.push([]);
-//     intermediateMemory[0].push(change);
-//   },
-
-//   /* writeUndo and writeRedo push intermediateMemory to their respective stores */
-//   writeUndo: (change) => {
-//     undoStore.push(change);
-//   },
-
-//   writeRedo: (change) => {
-//     redoStore.push(change);
-//   },
-// };

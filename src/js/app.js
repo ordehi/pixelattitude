@@ -10,7 +10,10 @@ const {
 } = Constants;
 
 import { createGrid } from './controllers/GridController.js';
-import { paintCell, clearCell } from './controllers/DrawingController.js';
+import {
+  handlePainting,
+  handleClearing,
+} from './controllers/DrawingController.js';
 import {
   debounce,
   random255,
@@ -21,7 +24,7 @@ import {
 } from './Helpers.js';
 
 import { Memory } from './controllers/MemoryController.js';
-const appMemory = new Memory();
+window.appMemory = new Memory();
 
 /* DOM */
 
@@ -40,12 +43,15 @@ const exportBtn = document.getElementById('export-btn');
 
 const colorPicker = document.getElementById('color-picker');
 const randomColorToggle = document.getElementById('random-color');
-let chosenColor = DEFAULT_COLOR;
-let randomColorChecked = randomColorToggle.checked;
+
+window.colorConfig = {
+  chosenColor: DEFAULT_COLOR,
+  randomColorChecked: randomColorToggle.checked,
+};
 
 /* Memory */
 
-let currentRun = 0;
+window.currentRun = 0;
 
 /*
  Creates a Uint8ClampedArray from the current grid to use as the basis for the PNG  to export. More on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray
@@ -159,75 +165,12 @@ function isRightClick(e) {
   return e.button === RIGHT_BUTTON;
 }
 
-/* Checks if the current cell being moused over is in the current run (the current painting movement before the mouseup event), this is to prevent trying to paint over a cell multiple times and filling up memory with duplicates */
-function isCell(e) {
-  return e.target.classList.contains('cell');
-}
-
-function getColors(e, isClearing = false) {
-  let prevColor = e.target.style.backgroundColor || '';
-  return isClearing
-    ? { prevColor, currColor: '' }
-    : { prevColor, currColor: randomColorChecked ? randomRGBA() : chosenColor };
-}
-
-function colorsAreDifferent(colors) {
-  return colors.currColor !== colors.prevColor;
-}
-
-/* Paints only if the current cell hasn't been painted over during the current run. This is probably the root of the not being able to paint over painted cells issue #1 */
-function handlePainting(e) {
-  if (isCell(e)) {
-    let colors = getColors(e);
-    if (colorsAreDifferent(colors)) {
-      let id = e.target.id;
-      updateCellRun(e);
-      paintCell(e, colors.currColor);
-      appMemory.writeIntermidiateMemory({ id, ...colors });
-    }
-  }
-}
-
-function handleClearing(e) {
-  e.preventDefault();
-  if (isCell(e)) {
-    let colors = getColors(e, true);
-    if (colorsAreDifferent(colors)) {
-      let id = e.target.id;
-      updateCellRun(e);
-      clearCell(e);
-      appMemory.writeIntermidiateMemory({ id, ...colors });
-    }
-  }
-}
-
 /* Runs undo or redo functions based on whether CTRL + Z or CTRL + Y are pressed, and if there's data on undoStore/redoStore */
 function handleKeyDown(e) {
-  if (e.keyCode == 90 && e.ctrlKey && appMemory.undoStore.length) undo(e);
-  if (e.keyCode == 89 && e.ctrlKey && appMemory.redoStore.length) redo(e);
-}
-
-/* undoes the last cell by getting the relevant data from undoStore and painting the grid with it */
-function undo(e) {
-  let change = appMemory.undoStore.pop();
-  for (const cell of change) {
-    document.getElementById(cell.id).style.backgroundColor = cell.prevColor;
-  }
-  appMemory.redoStore.push(change);
-}
-
-/* redoes last undo, only works if no cell has been done after the last undo */
-function redo(e) {
-  let change = appMemory.redoStore.pop();
-  for (const cell of change) {
-    document.getElementById(cell.id).style.backgroundColor = cell.currColor;
-  }
-  appMemory.undoStore.push(change);
-}
-
-/* Updates the currentRun variable, which represents the current painting movement being carried out to prevent the same cells from being painted multiple times. Likely involved in Issue #1 */
-function updateCellRun(e) {
-  e.target.dataset.run = currentRun;
+  if (e.keyCode == 90 && e.ctrlKey && appMemory.undoStore.length)
+    appMemory.undo();
+  if (e.keyCode == 89 && e.ctrlKey && appMemory.redoStore.length)
+    appMemory.redo();
 }
 
 /* We need to remove event listeners that paint and clear cells once we hear mouseup because otherwise you might end up painting indefinitely, or clearing when you meant to paint. There's probably a solution we should adopt instead of this. */
@@ -267,11 +210,11 @@ function handleMousedown(e) {
 document.onkeydown = handleKeyDown;
 
 colorPicker.addEventListener('input', (e) => {
-  chosenColor = rgbaArrToStr(hexStrToRGBArr(e.target.value));
+  colorConfig.chosenColor = rgbaArrToStr(hexStrToRGBArr(e.target.value));
 });
 
 randomColorToggle.addEventListener('input', (e) => {
-  randomColorChecked = randomColorToggle.checked;
+  colorConfig.randomColorChecked = randomColorToggle.checked;
 });
 
 clearBtn.addEventListener('click', (e) => {
