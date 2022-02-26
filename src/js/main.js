@@ -1,3 +1,14 @@
+import Constants from './Constants.js';
+const { HEIGHT, WIDTH } = Constants.DEFAULT;
+const {
+  MAX_HEIGHT,
+  MAX_WIDTH,
+  DEFAULT_COLOR,
+  LEFT_BUTTON,
+  MIDDLE_BUTTON,
+  RIGHT_BUTTON,
+} = Constants;
+
 /* DOM */
 
 const grid = document.querySelector('.grid-container');
@@ -15,7 +26,7 @@ const exportBtn = document.getElementById('export-btn');
 
 const colorPicker = document.getElementById('color-picker');
 const randomColorToggle = document.getElementById('random-color');
-let chosenColor = rgbaArrToStr(hexStrToRGBArr(colorPicker.value));
+let chosenColor = DEFAULT_COLOR;
 let randomColorChecked = randomColorToggle.checked;
 
 /* Memory */
@@ -60,10 +71,10 @@ function randomRGBA() {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-function hexStrToRGBArr(hashHex) {
-  let hex = hashHex[0] === '#' ? hashHex.substring(1) : hashHex;
-  return hex.match(/.{1,2}/g).map((hexVal) => parseInt(hexVal, 16));
-}
+// function hexStrToRGBArr(hashHex) {
+//   let hex = hashHex[0] === '#' ? hashHex.substring(1) : hashHex;
+//   return hex.match(/.{1,2}/g).map((hexVal) => parseInt(hexVal, 16));
+// }
 
 /* Extract RGB values from a string */
 function rgbStrToArr(strRGB = '') {
@@ -147,7 +158,7 @@ function createGrid(rows, cols) {
   grid.textContent = '';
   grid.style.setProperty('--grid-rows', rows);
   grid.style.setProperty('--grid-cols', cols);
-  for (count = 0; count < rows * cols; count += 1) {
+  for (let count = 0; count < rows * cols; count += 1) {
     let cell = document.createElement('div');
     cell.classList.add('cell');
     cell.id = 'cell-' + count;
@@ -203,11 +214,11 @@ exportBtn.onclick = exportPNG;
 
 /* isLeftClick and isRightClick check whether the mouse button being pressed is left or right, it's not infallible as it uses MouseEvent.button which may point to different buttons on some remapped devices, but it'll do for now */
 function isLeftClick(e) {
-  return e.button === 0;
+  return e.button === LEFT_BUTTON;
 }
 
 function isRightClick(e) {
-  return e.button === 2;
+  return e.button === RIGHT_BUTTON;
 }
 
 /* Checks if the current cell being moused over is in the current run (the current painting movement before the mouseup event), this is to prevent trying to paint over a cell multiple times and filling up memory with duplicates */
@@ -347,9 +358,9 @@ randomColorToggle.addEventListener('input', (e) => {
 
 clearBtn.addEventListener('click', (e) => {
   e.preventDefault();
-  if (rowsInput.value > 100) rowsInput.value = 100;
-  if (colsInput.value > 100) colsInput.value = 100;
-  createGrid(rowsInput.value || 32, colsInput.value || 32);
+  if (rowsInput.value > MAX_HEIGHT) rowsInput.value = MAX_HEIGHT;
+  if (colsInput.value > MAX_WIDTH) colsInput.value = MAX_WIDTH;
+  createGrid(rowsInput.value || HEIGHT, colsInput.value || WIDTH);
 });
 
 //grid.addEventListener('click', handlePainting);
@@ -366,4 +377,4 @@ grid.addEventListener('dragstart', (e) => {
 
 /* Lifecycle */
 
-createGrid(32, 32);
+createGrid(HEIGHT, WIDTH);
