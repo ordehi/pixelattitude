@@ -7,7 +7,7 @@ const Constants = {
   MAX_HEIGHT: 100,
   MAX_WIDTH: 100,
 
-  DEFAULT_COLOR: 'rgb(0, 0, 0)',
+  DEFAULT_COLOR: '#000000',
 
   LEFT_BUTTON: 0,
   MIDDLE_BUTTON: 1,

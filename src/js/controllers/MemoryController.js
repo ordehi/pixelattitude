@@ -2,6 +2,15 @@ export class Memory {
   undoStore = [];
   redoStore = [];
   intermediateMemory = [];
+  cellArray;
+
+  constructor(rows, cols) {
+    this.cellArray = new Array(rows * cols).fill([0, 0, 0, 0]);
+  }
+
+  setCellArray(rows, cols) {
+    this.cellArray = new Array(rows * cols).fill([0, 0, 0, 0]);
+  }
 
   writeIntermidiateMemory(change) {
     if (this.intermediateMemory.length === 0) this.intermediateMemory.push([]);

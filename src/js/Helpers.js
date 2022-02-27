@@ -42,7 +42,7 @@ export function rgbStrToArr(strRGB = '') {
   let match = strRGB.match(
     /rgba?\((\d{1,3}), ?(\d{1,3}), ?(\d{1,3})\)?(?:, ?(\d(?:\.\d?))\))?/
   );
-  return match ? [match[1], match[2], match[3]] : [0, 0, 0];
+  return match ? [match[1], match[2], match[3], 255] : [0, 0, 0, 0];
 }
 
 export function rgbaArrToStr(arr = [0, 0, 0, 0]) {
@@ -53,5 +53,7 @@ export function rgbaArrToStr(arr = [0, 0, 0, 0]) {
 
 export function hexStrToRGBArr(strHex = '') {
   let match = strHex.match(/[^#]{1,2}/g);
-  return match ? match.map((hexVal) => parseInt(hexVal, 16)) : [0, 0, 0, 0];
+  return match
+    ? [...match.map((hexVal) => parseInt(hexVal, 16)), 255]
+    : [0, 0, 0, 0];
 }

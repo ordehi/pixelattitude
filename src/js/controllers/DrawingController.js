@@ -5,6 +5,7 @@ function isCell(e) {
   return e.target.classList.contains('cell');
 }
 
+// TODO: Fix comparing colors from hex to rgb
 function getColors(e, isClearing = false, random, color) {
   let prevColor = e.target.style.backgroundColor || '';
   return isClearing

@@ -22,7 +22,6 @@ import {
 } from './Helpers.js';
 
 import { Memory } from './controllers/MemoryController.js';
-window.appMemory = new Memory();
 
 /* DOM */
 
@@ -50,6 +49,10 @@ window.colorConfig = {
 /* Memory */
 
 window.currentRun = 0;
+window.appMemory = new Memory(
+  rowsInput.value || HEIGHT,
+  colsInput.value || WIDTH
+);
 
 /*
  Creates a Uint8ClampedArray from the current grid to use as the basis for the PNG  to export. More on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray
@@ -210,7 +213,7 @@ function handleMousedown(e) {
 document.onkeydown = handleKeyDown;
 
 colorPicker.addEventListener('input', (e) => {
-  colorConfig.chosenColor = rgbaArrToStr(hexStrToRGBArr(e.target.value));
+  colorConfig.chosenColor = e.target.value;
 });
 
 randomColorToggle.addEventListener('input', (e) => {
@@ -219,9 +222,12 @@ randomColorToggle.addEventListener('input', (e) => {
 
 clearBtn.addEventListener('click', (e) => {
   e.preventDefault();
-  if (rowsInput.value > MAX_HEIGHT) rowsInput.value = MAX_HEIGHT;
-  if (colsInput.value > MAX_WIDTH) colsInput.value = MAX_WIDTH;
-  createGrid(grid, rowsInput.value || HEIGHT, colsInput.value || WIDTH);
+  let rows = rowsInput.value;
+  let cols = colsInput.value;
+  if (rows > MAX_HEIGHT) rowsInput.value = MAX_HEIGHT;
+  if (cols > MAX_WIDTH) colsInput.value = MAX_WIDTH;
+  appMemory.setCellArray(rows, cols);
+  createGrid(grid, appMemory.cellArray, rows || HEIGHT, cols || WIDTH);
 });
 
 //grid.addEventListener('click', handlePainting);
@@ -238,4 +244,4 @@ grid.addEventListener('dragstart', (e) => {
 
 /* Lifecycle */
 
-createGrid(grid, HEIGHT, WIDTH);
+createGrid(grid, appMemory.cellArray, HEIGHT, WIDTH);
