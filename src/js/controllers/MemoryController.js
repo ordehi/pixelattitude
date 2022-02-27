@@ -1,3 +1,5 @@
+import { rgbStrToArr } from '../Helpers.js';
+
 export class Memory {
   undoStore = [];
   redoStore = [];
@@ -8,8 +10,20 @@ export class Memory {
     this.cellArray = new Array(rows * cols).fill([0, 0, 0, 0]);
   }
 
-  setCellArray(rows, cols) {
+  initCellArray(rows, cols) {
     this.cellArray = new Array(rows * cols).fill([0, 0, 0, 0]);
+  }
+
+  writeCellArray(data) {
+    data.map((cell) => {
+      this.cellArray[Number(cell.id.substring(2))] = rgbStrToArr(
+        cell.currColor
+      );
+    });
+  }
+
+  arrToBuffer() {
+    return Uint8ClampedArray.from(this.cellArray.flat());
   }
 
   writeIntermidiateMemory(change) {
@@ -22,16 +36,20 @@ export class Memory {
     let change = this.undoStore.pop();
     for (const cell of change) {
       document.getElementById(cell.id).style.backgroundColor = cell.prevColor;
+      [cell.prevColor, cell.currColor] = [cell.currColor, cell.prevColor];
     }
     this.redoStore.push(change);
+    this.writeCellArray(change);
   }
 
   /* redoes last undo, only works if no cell has been done after the last undo */
   redo() {
     let change = this.redoStore.pop();
     for (const cell of change) {
-      document.getElementById(cell.id).style.backgroundColor = cell.currColor;
+      document.getElementById(cell.id).style.backgroundColor = cell.prevColor;
+      [cell.prevColor, cell.currColor] = [cell.currColor, cell.prevColor];
     }
     this.undoStore.push(change);
+    this.writeCellArray(change);
   }
 }

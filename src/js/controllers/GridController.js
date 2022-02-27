@@ -1,3 +1,5 @@
+import { rgbToHex, rgbaArrToStr } from '../Helpers.js';
+
 /* Creates a grid given rows and cols integers for width and height */
 export function createGrid(grid, cellArray, rows, cols) {
   grid.textContent = '';
@@ -5,12 +7,12 @@ export function createGrid(grid, cellArray, rows, cols) {
   grid.style.setProperty('--grid-cols', cols);
 
   cellArray.map((cell, idx) => {
-    let pixel = document.createElement('div');
-    pixel.classList.add('cell');
-    pixel.dataset.index = idx;
-    pixel.dataset.run = 'initial';
-    pixel.style.backgroundColor = `rgba(${cell.join(',')})`;
-    grid.appendChild(pixel);
+    let gridCell = document.createElement('div');
+    gridCell.classList.add('cell');
+    gridCell.id = 'c-' + idx;
+    gridCell.dataset.run = 'initial';
+    gridCell.style.backgroundColor = rgbaArrToStr(cell);
+    grid.appendChild(gridCell);
   });
 
   // for (let count = 0; count < rows * cols; count += 1) {

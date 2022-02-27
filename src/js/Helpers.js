@@ -38,11 +38,21 @@ export function randomRGBA() {
 // }
 
 /* Extract RGB values from a string */
-export function rgbStrToArr(strRGB = '') {
-  let match = strRGB.match(
-    /rgba?\((\d{1,3}), ?(\d{1,3}), ?(\d{1,3})\)?(?:, ?(\d(?:\.\d?))\))?/
-  );
-  return match ? [match[1], match[2], match[3], 255] : [0, 0, 0, 0];
+export function rgbStrToArr(str = '') {
+  let match = str.match(/(rgba?)|(\d+(\.\d+)?%?)|(\.\d+)/g);
+  if (match) {
+    if (!match[0].includes('rgba')) {
+      return [Number(match[1]), Number(match[2]), Number(match[3]), 255];
+    }
+    return [
+      Number(match[1]),
+      Number(match[2]),
+      Number(match[3]),
+      Number(match[4]),
+    ];
+  } else {
+    return [0, 0, 0, 0];
+  }
 }
 
 export function rgbaArrToStr(arr = [0, 0, 0, 0]) {
@@ -56,4 +66,41 @@ export function hexStrToRGBArr(strHex = '') {
   return match
     ? [...match.map((hexVal) => parseInt(hexVal, 16)), 255]
     : [0, 0, 0, 0];
+}
+
+export function hexToRGB(hexStr) {
+  let rgbArr = hexStrToRGBArr(hexStr);
+  rgbArr.pop();
+  let rgb = rgbaArrToStr(rgbArr);
+  return rgb;
+}
+
+function decimalToHex(decimal) {
+  return decimal.toString(16);
+}
+
+export function rgbToHex(rgbStr, popAlpha) {
+  let rgbArr = rgbStrToArr(rgbStr);
+  if (popAlpha) rgbArr.pop();
+  let hexVals = rgbArr.map((val) => decimalToHex(val)).join('');
+  return '#' + hexVals;
+}
+
+export function rgbToRGBA(rgb) {
+  if (rgb.includes('rgba')) return rgb;
+  let rgbArr = rgbStrToArr(rgb);
+  return rgbaArrToStr(rgbArr);
+}
+
+export function getCellId(e) {
+  return e.target.id;
+}
+
+/* Updates the currentRun variable, which represents the current painting movement being carried out to prevent the same cells from being painted multiple times. Likely involved in Issue #1 */
+export function updateCellRun(e) {
+  e.target.dataset.run = currentRun;
+}
+
+export function isNotInRun(e) {
+  return Number(e.target.dataset.run) !== currentRun;
 }

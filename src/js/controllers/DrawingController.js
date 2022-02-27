@@ -1,25 +1,31 @@
 /* Checks if the current cell being moused over is in the current run (the current painting movement before the mouseup event), this is to prevent trying to paint over a cell multiple times and filling up memory with duplicates */
-import { randomRGBA } from '../Helpers.js';
+import {
+  rgbToRGBA,
+  randomRGBA,
+  getCellId,
+  isNotInRun,
+  updateCellRun,
+} from '../Helpers.js';
 
 function isCell(e) {
   return e.target.classList.contains('cell');
 }
 
-// TODO: Fix comparing colors from hex to rgb
-function getColors(e, isClearing = false, random, color) {
-  let prevColor = e.target.style.backgroundColor || '';
+function getColors(e, isClearing = false) {
+  let prevColor =
+    rgbToRGBA(e.target.style.backgroundColor) || 'rgba(0, 0, 0, 0)';
   return isClearing
-    ? { prevColor, currColor: '' }
-    : { prevColor, currColor: random ? randomRGBA() : color };
+    ? { prevColor, currColor: 'rgba(0, 0, 0, 0)' }
+    : {
+        prevColor,
+        currColor: colorConfig.randomColorChecked
+          ? randomRGBA()
+          : colorConfig.chosenColor,
+      };
 }
 
 function colorsAreDifferent(colors) {
   return colors.currColor !== colors.prevColor;
-}
-
-/* Updates the currentRun variable, which represents the current painting movement being carried out to prevent the same cells from being painted multiple times. Likely involved in Issue #1 */
-function updateCellRun(e) {
-  e.target.dataset.run = currentRun;
 }
 
 /* 
@@ -35,32 +41,28 @@ function clearCell(e) {
 }
 
 /* Paints only if the current cell hasn't been painted over during the current run. This is probably the root of the not being able to paint over painted cells issue #1 */
+
+function updateCellAndMemory(e, colors, id) {
+  updateCellRun(e);
+  paintCell(e, colors.currColor);
+  appMemory.writeIntermidiateMemory({ id, ...colors });
+}
+
 export function handlePainting(e) {
-  if (isCell(e)) {
-    let colors = getColors(
-      e,
-      false,
-      colorConfig.randomColorChecked,
-      colorConfig.chosenColor
-    );
+  if ((isCell(e) && isNotInRun(e)) || colorConfig.randomColorChecked) {
+    let colors = getColors(e, false);
     if (colorsAreDifferent(colors)) {
-      let id = e.target.id;
-      updateCellRun(e);
-      paintCell(e, colors.currColor);
-      appMemory.writeIntermidiateMemory({ id, ...colors });
+      updateCellAndMemory(e, colors, getCellId(e));
     }
   }
 }
 
 export function handleClearing(e) {
   e.preventDefault();
-  if (isCell(e)) {
+  if (isCell(e) && isNotInRun(e)) {
     let colors = getColors(e, true);
     if (colorsAreDifferent(colors)) {
-      let id = e.target.id;
-      updateCellRun(e);
-      clearCell(e);
-      appMemory.writeIntermidiateMemory({ id, ...colors });
+      updateCellAndMemory(e, colors, getCellId(e));
     }
   }
 }

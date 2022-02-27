@@ -14,12 +14,7 @@ import {
   handlePainting,
   handleClearing,
 } from './controllers/DrawingController.js';
-import {
-  debounce,
-  rgbStrToArr,
-  rgbaArrToStr,
-  hexStrToRGBArr,
-} from './Helpers.js';
+import { debounce, rgbStrToArr, hexToRGB, rgbToRGBA } from './Helpers.js';
 
 import { Memory } from './controllers/MemoryController.js';
 
@@ -42,7 +37,7 @@ const colorPicker = document.getElementById('color-picker');
 const randomColorToggle = document.getElementById('random-color');
 
 window.colorConfig = {
-  chosenColor: DEFAULT_COLOR,
+  chosenColor: rgbToRGBA(hexToRGB(DEFAULT_COLOR)),
   randomColorChecked: randomColorToggle.checked,
 };
 
@@ -58,14 +53,7 @@ window.appMemory = new Memory(
  Creates a Uint8ClampedArray from the current grid to use as the basis for the PNG  to export. More on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray
 */
 function getBuffer(grid) {
-  let buffer = new Uint8ClampedArray(
-    Array.from(grid.children)
-      .map((cell) => {
-        let color = cell.style.backgroundColor;
-        return color ? [...rgbStrToArr(color), 255] : [0, 0, 0, 0];
-      })
-      .flat()
-  );
+  let buffer = appMemory.arrToBuffer();
 
   return buffer;
 }
@@ -187,8 +175,13 @@ function handleMouseup(e) {
       handleClearing(e);
     }
   }
-  appMemory.undoStore.push(appMemory.intermediateMemory.pop());
-  if (appMemory.redoStore.length) appMemory.redoStore.length = 0;
+
+  if (appMemory.intermediateMemory.length) {
+    let change = appMemory.intermediateMemory.pop();
+    appMemory.undoStore.push(change);
+    appMemory.writeCellArray(change);
+    if (appMemory.redoStore.length) appMemory.redoStore.length = 0;
+  }
 }
 
 function removeListeners(e) {
@@ -213,7 +206,7 @@ function handleMousedown(e) {
 document.onkeydown = handleKeyDown;
 
 colorPicker.addEventListener('input', (e) => {
-  colorConfig.chosenColor = e.target.value;
+  colorConfig.chosenColor = rgbToRGBA(hexToRGB(e.target.value));
 });
 
 randomColorToggle.addEventListener('input', (e) => {
@@ -226,7 +219,7 @@ clearBtn.addEventListener('click', (e) => {
   let cols = colsInput.value;
   if (rows > MAX_HEIGHT) rowsInput.value = MAX_HEIGHT;
   if (cols > MAX_WIDTH) colsInput.value = MAX_WIDTH;
-  appMemory.setCellArray(rows, cols);
+  appMemory.initCellArray(rows, cols);
   createGrid(grid, appMemory.cellArray, rows || HEIGHT, cols || WIDTH);
 });
 
