@@ -47,6 +47,7 @@ header {
   grid-template-rows: repeat(var(--grid-rows), 1fr);
   grid-template-columns: repeat(var(--grid-cols), 0fr);
   margin: 1em 0;
+  background-color: white;
 }
 
 .cell {
