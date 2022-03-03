@@ -30,6 +30,8 @@ const clearBtn = document.getElementById('clear-draw');
 const saveBtn = document.getElementById('save-btn');
 const loadBtn = document.getElementById('load-btn');
 const exportBtn = document.getElementById('export-btn');
+const undoBtn = document.getElementById('undo-btn');
+const redoBtn = document.getElementById('redo-btn');
 
 /* Color management variables */
 
@@ -158,10 +160,24 @@ function isRightClick(e) {
 
 /* Runs undo or redo functions based on whether CTRL + Z or CTRL + Y are pressed, and if there's data on undoStore/redoStore */
 function handleKeyDown(e) {
-  if (e.keyCode == 90 && e.ctrlKey && appMemory.undoStore.length)
-    appMemory.undo();
-  if (e.keyCode == 89 && e.ctrlKey && appMemory.redoStore.length)
-    appMemory.redo();
+  if (e.keyCode == 90 && e.ctrlKey && appMemory.undoStore.length) handleUndo();
+  if (e.keyCode == 89 && e.ctrlKey && appMemory.redoStore.length) handleRedo();
+}
+
+function handleUndo(e) {
+  appMemory.undo();
+  if (appMemory.undoStore.length === 0) {
+    undoBtn.disabled = true;
+  }
+  redoBtn.disabled = false;
+}
+
+function handleRedo() {
+  appMemory.redo();
+  if (appMemory.redoStore.length === 0) {
+    redoBtn.disabled = true;
+  }
+  undoBtn.disabled = false;
 }
 
 /* We need to remove event listeners that paint and clear cells once we hear mouseup because otherwise you might end up painting indefinitely, or clearing when you meant to paint. There's probably a solution we should adopt instead of this. */
@@ -180,7 +196,11 @@ function handleMouseup(e) {
     let change = appMemory.intermediateMemory.pop();
     appMemory.undoStore.push(change);
     appMemory.writeCellArray(change);
-    if (appMemory.redoStore.length) appMemory.redoStore.length = 0;
+    undoBtn.disabled = false;
+    if (appMemory.redoStore.length) {
+      appMemory.redoStore.length = 0;
+      redoBtn.disabled = true;
+    }
   }
 }
 
@@ -234,6 +254,9 @@ grid.addEventListener('contextmenu', handleClearing);
 grid.addEventListener('dragstart', (e) => {
   e.preventDefault();
 });
+
+undoBtn.addEventListener('click', handleUndo);
+redoBtn.addEventListener('click', handleRedo);
 
 /* Lifecycle */
 
