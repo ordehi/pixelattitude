@@ -56,6 +56,22 @@ header {
   text-align: center;
 }
 
+.revert_change {
+  display: table-cell;
+}
+
+/*Used to style undo and redo button [disabled] is used to styles in browsers that support css2*/
+
+button:disabled,
+button[disabled] {
+  color: #000000;
+  background-color: #808080;
+  border: 1px solid #000000 ;
+  text-shadow: 0 1px 0 var(--blue-2); 
+  width: 100px;
+  pointer-events: none;
+}
+
 /* .cell:hover {
   background-color: aqua;
 } */

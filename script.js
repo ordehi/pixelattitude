@@ -10,6 +10,8 @@ const clearBtn = document.getElementById('clear-draw');
 const saveBtn = document.getElementById('save-btn');
 const loadBtn = document.getElementById('load-btn');
 const exportBtn = document.getElementById('export-btn');
+const undoBtn = document.getElementById('undo-btn');
+const redoBtn = document.getElementById('redo-btn');
 
 /* Color management variables */
 
@@ -261,7 +263,8 @@ function handleKeyDown(e) {
   if (e.keyCode == 89 && e.ctrlKey && redoStore.length) redo(e);
 }
 
-/* undoes the last action by getting the relevant data from undoStore and painting the grid with it */
+/* undoes the last action by getting the relevant data from undoStore and painting the grid with it
+It also checks whether the length of undostore is zero, if true it disables the undo button */
 function undo(e) {
   let change = undoStore.pop();
   for (const action of change) {
@@ -269,9 +272,14 @@ function undo(e) {
       action.prevColor;
   }
   writeRedo(change);
+  if(undoStore.length == 0)
+  {
+    undoBtn.disabled = true;
+  }
 }
 
-/* redoes last undo, only works if no action has been done after the last undo */
+/* redoes last undo, only works if no action has been done after the last undo 
+It checks for the length of redostore for its value , if it is zero it disables the button*/
 function redo(e) {
   let change = redoStore.pop();
   for (const action of change) {
@@ -279,6 +287,9 @@ function redo(e) {
       action.currColor;
   }
   writeUndo(change);
+  if (redoStore == 0) {
+    redoBtn.disabled = true;
+  }
 }
 
 /* Updates the currentRun variable, which represents the current painting movement being carried out to prevent the same cells from being painted multiple times. Likely involved in Issue #1 */
@@ -292,13 +303,21 @@ function writeIntermidiateMemory(cell, prevColor, currColor) {
   intermediateMemory[0].push({ cell, prevColor, currColor });
 }
 
-/* writeUndo and writeRedo push intermediateMemory to their respective stores */
+/* writeUndo and writeRedo push intermediateMemory to their respective stores
+also they check if the length of buffer is not zero then it enables the undo and redo button*/
 function writeUndo(change) {
   undoStore.push(change);
+  console.log(undoStore.length)
+  if(undoStore.length != 0)  {
+    undoBtn.disabled = false;
+  }
 }
 
 function writeRedo(change) {
   redoStore.push(change);
+  if (redoStore.length != 0) {
+    redoBtn.disabled = false;
+  }
 }
 
 /* We need to remove event listeners that paint and clear cells once we hear mouseup because otherwise you might end up painting indefinitely, or clearing when you meant to paint. There's probably a solution we should adopt instead of this. */
@@ -363,6 +382,9 @@ grid.addEventListener('contextmenu', handleClearing);
 grid.addEventListener('dragstart', (e) => {
   e.preventDefault();
 });
+
+undoBtn.addEventListener('click',undo)
+redoBtn.addEventListener('click',redo)
 
 /* Lifecycle */
 
