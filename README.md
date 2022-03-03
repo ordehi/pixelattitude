@@ -35,6 +35,10 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 - **Joshua Ordehi** - _Initial work_
 
+## Contributors
+
+- [Pratham Saraf](https://github.com/pratham-saraf)
+
 See also the list of [contributors](https://github.com/ordehi/pixelattitude/graphs/contributors) who participated in this project.
 
 ## License
