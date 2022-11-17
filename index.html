@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pixel Editor</title>
+    <link rel="stylesheet" href="https://unpkg.com/open-props" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/open-props/normalize.min.css"
+    />
+    <link rel="stylesheet" href="./src/css/style.css" />
+  </head>
+  <body>
+    <div class="content">
+      <header>
+        <h1 class="title">Pixel</h1>
+        <form action="#" id="grid-config">
+          <ul>
+            <li>
+              <label for="rows-input">Rows</label>
+              <input
+                type="number"
+                name="rows-input"
+                id="rows-input"
+                max="100"
+                value="32"
+              />
+            </li>
+            <li>
+              <label for="cols-input">Columns</label>
+              <input
+                type="number"
+                name="cols-input"
+                id="cols-input"
+                max="100"
+                value="32"
+              />
+            </li>
+            <li>
+              <button id="clear-draw">Reset</button>
+            </li>
+          </ul>
+          <ul>
+            <li>
+              <label for="color-picker">Pick a color</label>
+              <input
+                type="color"
+                name="color-picker"
+                id="color-picker"
+                value="#000000"
+              />
+            </li>
+            <li>
+              <label for="random-color">Random Color?</label>
+              <input type="checkbox" name="random-color" id="random-color" />
+            </li>
+            <div class="revert_change">
+<<<<<<< HEAD:src/index.html
+              <li>
+                <button disabled id="undo-btn">Undo</button>
+              </li>
+            </div>
+            <div class="revert_change">
+              <li>
+                <button disabled id="redo-btn">Redo</button>
+              </li>
+=======
+            <li>
+              <button disabled id="undo-btn">
+              Undo
+              </button>
+            </li>
+            </div>
+            <div class="revert_change">
+            <li>
+              <button disabled id="redo-btn">
+              Redo
+              </button>
+            </li>
+>>>>>>> 44751331f50b047f6fbbe1e5558b786db69c2c09:index.html
+            </div>
+          </ul>
+
+
+          <ul>
+            <li><button id="save-btn">Save</button></li>
+            <li><button id="load-btn">Load</button></li>
+          </ul>
+          <ul>
+            <li><button id="export-btn">Export PNG</button></li>
+          </ul>
+        </form>
+      </header>
+      <div class="app">
+        <div class="grid-container"></div>
+      </div>
+    </div>
+    <script type="module" src="./src/js/app.js"></script>
+  </body>
+</html>
