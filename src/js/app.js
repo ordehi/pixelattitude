@@ -129,12 +129,12 @@ function loadGridFromLocalStorage() {
   rowsInput.value = gridSize[0];
   colsInput.value = gridSize[1];
 
-  createGrid(gridSize[0], gridSize[1]);
+  createGrid(grid, arrOfGrid, Number(gridSize[0]), Number(gridSize[1]));
 
-  arrOfGrid.forEach((cell) => {
-    document.getElementById(cell.split('|')[0]).style.backgroundColor =
-      cell.split('|')[1];
-  });
+//  arrOfGrid.forEach((cell) => {
+//    document.getElementById(cell.split('|')[0]).style.backgroundColor =
+//      cell.split('|')[1];
+//  });
 }
 
 const loadGrid = debounce(() => {
