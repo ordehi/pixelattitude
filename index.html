@@ -15,67 +15,70 @@
   <body>
     <div class="content">
       <header>
-        <h1 class="title">Pixel</h1>
-        <form action="#" id="grid-config">
-          <ul>
-            <li>
-              <label for="rows-input">Rows</label>
-              <input
-                type="number"
-                name="rows-input"
-                id="rows-input"
-                max="100"
-                value="32"
-              />
-            </li>
-            <li>
-              <label for="cols-input">Columns</label>
-              <input
-                type="number"
-                name="cols-input"
-                id="cols-input"
-                max="100"
-                value="32"
-              />
-            </li>
-            <li>
-              <button id="clear-draw">Reset</button>
-            </li>
-          </ul>
-          <ul>
-            <li>
-              <label for="color-picker">Pick a color</label>
-              <input
-                type="color"
-                name="color-picker"
-                id="color-picker"
-                value="#000000"
-              />
-            </li>
-            <li>
-              <label for="random-color">Random Color?</label>
-              <input type="checkbox" name="random-color" id="random-color" />
-            </li>
-            <div class="revert_change">
+        <div class="header-content">
+          <h1 class="title">Pixel</h1>
+          <form action="#" id="grid-config">
+            <ul>
               <li>
-                <button disabled id="undo-btn">Undo</button>
+                <label for="rows-input">Rows</label>
+                <input
+                  type="number"
+                  name="rows-input"
+                  id="rows-input"
+                  max="100"
+                  value="32"
+                />
               </li>
-            </div>
-            <div class="revert_change">
               <li>
-                <button disabled id="redo-btn">Redo</button>
+                <label for="cols-input">Columns</label>
+                <input
+                  type="number"
+                  name="cols-input"
+                  id="cols-input"
+                  max="100"
+                  value="32"
+                />
               </li>
-            </div>
-          </ul>
-          <ul>
-            <li><button id="save-btn">Save</button></li>
-            <li><button id="load-btn">Load</button></li>
-          </ul>
-          <ul>
-            <li><button id="export-btn">Export PNG</button></li>
-          </ul>
-        </form>
+              <li>
+                <button id="clear-draw">Reset</button>
+              </li>
+            </ul>
+            <ul>
+              <li>
+                <label for="color-picker">Pick a color</label>
+                <input
+                  type="color"
+                  name="color-picker"
+                  id="color-picker"
+                  value="#000000"
+                />
+              </li>
+              <li>
+                <label for="random-color">Random Color?</label>
+                <input type="checkbox" name="random-color" id="random-color" />
+              </li>
+              <div class="revert_change">
+                <li>
+                  <button disabled id="undo-btn">Undo</button>
+                </li>
+              </div>
+              <div class="revert_change">
+                <li>
+                  <button disabled id="redo-btn">Redo</button>
+                </li>
+              </div>
+            </ul>
+            <ul>
+              <li><button id="save-btn">Save</button></li>
+              <li><button id="load-btn">Load</button></li>
+            </ul>
+            <ul>
+              <li><button id="export-btn">Export PNG</button></li>
+            </ul>
+          </form>
+        </div>
       </header>
+
       <div class="app">
         <div class="grid-container"></div>
       </div>

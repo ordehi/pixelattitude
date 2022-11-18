@@ -4,8 +4,8 @@ const Constants = {
     WIDTH: 32,
   },
 
-  MAX_HEIGHT: 100,
-  MAX_WIDTH: 100,
+  MAX_HEIGHT: 64,
+  MAX_WIDTH: 64,
 
   DEFAULT_COLOR: '#000000',
 

@@ -8,51 +8,47 @@ html {
   --text-2: var(--gray-9);
 }
 
-/* 
+
 body {
   font-family: 'Courier New', Courier, monospace;
   margin: auto;
   background-color: black;
   color: white;
-  height: 100vh;
+  min-height: 100vh;
 }
 
-header {
+/* header {
   width: 100%;
-}
+} */
 
-.title {
+/* .title {
   margin: 1em;
   text-align: center;
   border: 1px solid white;
 } */
 
-/* .content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-} */
+.content {
+  
+}
 
 .app {
-  width: 100%;
-  display: flex;
-  justify-content: center;
+  padding: 1rem
 }
 
 .grid-container {
   /* padding: 1em;
-  margin: auto;
-  width: fit-content; */
+  margin: auto; */
+  margin: 0 auto;
+  width: 600px;
+  height: 600px;
   display: grid;
   grid-template-rows: repeat(var(--grid-rows), 1fr);
-  grid-template-columns: repeat(var(--grid-cols), 0fr);
-  margin: 1em 0;
+  grid-template-columns: repeat(var(--grid-cols), 1fr);
   background-color: white;
+
 }
 
 .cell {
-  width: 18px;
-  height: 18px;
   border: 1px solid #ddd;
   text-align: center;
 }
@@ -113,9 +109,9 @@ li {
   justify-content: end;
 }
 
-input:focus {
+/* input:focus {
   border: 2px solid #fff;
-}
+} */
 
 header {
   background-image: var(--gradient-21);
@@ -124,7 +120,9 @@ header {
   font-weight: var(--font-weight-9);
   font-family: var(--font-sans);
   box-shadow: var(--shadow-4);
-  width: 100%;
+}
+
+.header-content {
   display: flex;
   align-items: center;
 }
@@ -143,6 +141,10 @@ button:hover {
 
 .title {
   padding-left: 1em;
+}
+
+#rows-input, #cols-input {
+  width: 100px;
 }
 
 @media (prefers-color-scheme: dark) {
