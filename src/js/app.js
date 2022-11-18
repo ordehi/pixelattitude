@@ -9,13 +9,12 @@ const {
   RIGHT_BUTTON,
 } = Constants;
 
-import { createGrid } from './controllers/GridController.js';
+import { createGrid, getCellArray } from './controllers/GridController.js';
 import {
   handlePainting,
   handleClearing,
 } from './controllers/DrawingController.js';
 import { debounce, rgbStrToArr, hexToRGB, rgbToRGBA } from './Helpers.js';
-
 import { Memory } from './controllers/MemoryController.js';
 
 /* DOM */
@@ -56,7 +55,6 @@ window.appMemory = new Memory(
 */
 function getBuffer(grid) {
   let buffer = appMemory.arrToBuffer();
-
   return buffer;
 }
 
@@ -106,14 +104,11 @@ const exportPNG = debounce(() => downloadPNG());
 
 /* Saves grid to localStorage by getting all children of the grid element that contain colors and stringifying that so it can be stored */
 function saveGridToLocalStorage() {
-  let saveData = Array.from(grid.children)
-    .filter((cell) => !['', 'unset'].includes(cell.style.backgroundColor))
-    .map((cell) => cell.id + '|' + cell.style.backgroundColor)
-    .join('/');
-
+  const saveData = appMemory.arrToBuffer();
   if (saveData.length) {
-    saveData = rowsInput.value + 'x' + colsInput.value + '/' + saveData;
-    localStorage.setItem('pixel', saveData);
+    const dimensions = `${rowsInput.value}x${colsInput.value}/`;
+    const dataToStore = dimensions + saveData;
+    localStorage.setItem('pixel', dataToStore);
   }
 }
 
@@ -123,18 +118,13 @@ const saveGrid = debounce(() => saveGridToLocalStorage());
 Loads a grid from localStorage if present, 
  */
 function loadGridFromLocalStorage() {
-  let strOfGrid = localStorage.getItem('pixel');
-  let arrOfGrid = strOfGrid.split('/');
-  let gridSize = arrOfGrid.shift().split('x');
+  const strOfGrid = localStorage.getItem('pixel');
+  const arrOfGrid = strOfGrid.split('/');
+  const gridSize = arrOfGrid.shift().split('x');
   rowsInput.value = gridSize[0];
   colsInput.value = gridSize[1];
-
-  createGrid(grid, arrOfGrid, Number(gridSize[0]), Number(gridSize[1]));
-
-//  arrOfGrid.forEach((cell) => {
-//    document.getElementById(cell.split('|')[0]).style.backgroundColor =
-//      cell.split('|')[1];
-//  });
+  const bufferGrid = getCellArray(arrOfGrid[0]);
+  createGrid(grid, bufferGrid, Number(gridSize[0]), Number(gridSize[1]));
 }
 
 const loadGrid = debounce(() => {

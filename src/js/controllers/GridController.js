@@ -5,7 +5,6 @@ export function createGrid(grid, cellArray, rows, cols) {
   grid.textContent = '';
   grid.style.setProperty('--grid-rows', rows);
   grid.style.setProperty('--grid-cols', cols);
-
   cellArray.map((cell, idx) => {
     let gridCell = document.createElement('div');
     gridCell.classList.add('cell');
@@ -14,44 +13,41 @@ export function createGrid(grid, cellArray, rows, cols) {
     gridCell.style.backgroundColor = rgbaArrToStr(cell);
     grid.appendChild(gridCell);
   });
-
-  // for (let count = 0; count < rows * cols; count += 1) {
-  //   let cell = document.createElement('div');
-  //   cell.classList.add('cell');
-  //   cell.id = 'cell-' + count;
-  //   cell.dataset.run = 'initial';
-  //   grid.appendChild(cell);
-  // }
 }
 
-// function gridFromBuffer() {
-//   let gridBuffer = new Uint8ClampedArray(32 * 32 * 4).fill(0);
-//   let cellIdx = 0;
-//   gridBuffer.reduce((prev, curr, idx) => {
-//     if (idx % 4 === 0) {
-//       cellIdx = idx / 4;
-//     }
+function gridFromBuffer() {
+  let gridBuffer = new Uint8ClampedArray(32 * 32 * 4).fill(0);
+  let cellIdx = 0;
+  gridBuffer.reduce((prev, curr, idx) => {
+    if (idx % 4 === 0) {
+      cellIdx = idx / 4;
+    }
 
-//     return prev;
-//   }, []);
-// }
+    return prev;
+  }, []);
+}
 
-// function bufferToArr(buffer) {
-//   return Array.from(buffer);
-// }
+function bufferToArr(buffer) {
+  return Array.from(buffer);
+}
 
-// function arrToBuffer(arr) {
-//   return Uint8ClampedArray.from(arr);
-// }
+function stringToArr(string) {
+  return string.split(',');
+}
 
-// function unflattenArray(arr, n) {
-//   let copy = arr.concat();
-//   let result = [];
+function arrToBuffer(arr) {
+  return Uint8ClampedArray.from(arr);
+}
 
-//   while (copy.length) {
-//     result.push(copy.splice(0, n));
-//   }
-//   return result;
-// }
+export function unflattenArray(arr, n) {
+  let copy = arr.concat();
+  const result = [];
+  while (copy.length) {
+    result.push(copy.splice(0, n));
+  }
 
-// let cellArray = unflattenArray(bufferToArr(buffer));
+  return result;
+}
+
+export const getCellArray = (arrOfGrid) =>
+  unflattenArray(stringToArr(arrOfGrid), 4);
